@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary-blue: #2563eb;
+    --primary-blue-hover: #1d4ed8;
+    --primary-blue-light: #eff6ff;
+    --brand-blue: #0052ff;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #0f172a;
+    background-color: #f8fafc;
+  }
+}
+
+/* Custom electric bright blue utility classes to override standard dull blue */
+.bg-brand-blue {
+  background-color: #2563eb;
+}
+.bg-brand-blue-gradient {
+  background: linear-gradient(135deg, #0052ff 0%, #2563eb 100%);
+}
+.text-brand-blue {
+  color: #2563eb;
+}
+.border-brand-blue {
+  border-color: #2563eb;
+}
+
