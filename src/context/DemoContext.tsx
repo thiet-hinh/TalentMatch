@@ -47,6 +47,9 @@ const STORAGE_KEY_VNPAY = 'talentmatch_demo_vnpay_v4';
 const STORAGE_KEY_CONFIG = 'talentmatch_demo_config_v4';
 const STORAGE_KEY_FREELANCERS = 'talentmatch_demo_freelancers_v4';
 const STORAGE_KEY_NOTIFICATIONS = 'talentmatch_demo_notifications_v4';
+const STORAGE_KEY_SAVED_FREELANCERS = 'talentmatch_demo_saved_freelancers_v4';
+const STORAGE_KEY_SAVED_EMPLOYERS = 'talentmatch_demo_saved_employers_v4';
+const STORAGE_KEY_SAVED_PROJECTS = 'talentmatch_demo_saved_projects_v4';
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -136,6 +139,13 @@ interface DemoContextType {
   verifyEmail: (userId?: string) => void;
   resendVerificationEmail: (email: string) => void;
   changeVerificationEmail: (newEmail: string) => void;
+  submitKyc: (data?: {
+    idNumber?: string;
+    fullName?: string;
+    taxCode?: string;
+    companyName?: string;
+    userId?: string;
+  }) => void;
   loginUser: (email: string, password?: string) => { success: boolean; isUnverified?: boolean; message?: string };
   loginWithGoogle: () => void;
   completeGoogleRegister: (role: 'freelancer' | 'employer') => void;
@@ -173,6 +183,17 @@ interface DemoContextType {
     skills: string[];
     portfolio: PortfolioItem[];
   }) => void;
+
+  // Bookmarks & Saved Profiles (Freelancer & Employer)
+  savedFreelancerIds: string[];
+  savedEmployerIds: string[];
+  savedProjectIds: string[];
+  toggleSaveFreelancer: (freelancerId: string) => void;
+  toggleSaveEmployer: (employerId: string) => void;
+  toggleSaveProject: (projectId: string) => void;
+  isFreelancerSaved: (freelancerId: string) => boolean;
+  isEmployerSaved: (employerId: string) => boolean;
+  isProjectSaved: (projectId: string) => boolean;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
@@ -208,10 +229,30 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  // Saved Bookmarks (Freelancers, Employers, Projects)
+  const [savedFreelancerIds, setSavedFreelancerIds] = useState<string[]>(() =>
+    loadFromStorage(STORAGE_KEY_SAVED_FREELANCERS, ['free-1', 'free-2'])
+  );
+  const [savedEmployerIds, setSavedEmployerIds] = useState<string[]>(() =>
+    loadFromStorage(STORAGE_KEY_SAVED_EMPLOYERS, ['usr-emp-1', 'usr-emp-2'])
+  );
+  const [savedProjectIds, setSavedProjectIds] = useState<string[]>(() =>
+    loadFromStorage(STORAGE_KEY_SAVED_PROJECTS, ['prj-1', 'prj-2'])
+  );
+
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
   }, [users]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_SAVED_FREELANCERS, JSON.stringify(savedFreelancerIds));
+  }, [savedFreelancerIds]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_SAVED_EMPLOYERS, JSON.stringify(savedEmployerIds));
+  }, [savedEmployerIds]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_SAVED_PROJECTS, JSON.stringify(savedProjectIds));
+  }, [savedProjectIds]);
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(projects));
   }, [projects]);
@@ -589,6 +630,48 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setCurrentUser((prev) => ({ ...prev, email: newEmail }));
     setUsers((prev) => prev.map((u) => (u.id === currentUser.id ? { ...u, email: newEmail } : u)));
     addToast(`Đã cập nhật email xác thực mới: ${newEmail}`, 'success');
+  };
+
+  const submitKyc = (data?: {
+    idNumber?: string;
+    fullName?: string;
+    taxCode?: string;
+    companyName?: string;
+    userId?: string;
+  }) => {
+    const targetId = data?.userId || currentUser.id;
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === targetId) {
+          return {
+            ...u,
+            kycStatus: 'VERIFIED',
+            isVerified: true,
+            taxCode: data?.taxCode || u.taxCode,
+            companyName: data?.companyName || u.companyName,
+            name: data?.fullName || u.name
+          };
+        }
+        return u;
+      })
+    );
+
+    if (currentUser.id === targetId) {
+      setCurrentUser((prev) => ({
+        ...prev,
+        kycStatus: 'VERIFIED',
+        isVerified: true,
+        taxCode: data?.taxCode || prev.taxCode,
+        companyName: data?.companyName || prev.companyName,
+        name: data?.fullName || prev.name
+      }));
+    }
+
+    setFreelancers((prev) =>
+      prev.map((f) => (f.userId === targetId ? { ...f, isVerified: true } : f))
+    );
+
+    addToast('✓ Xác minh eKYC danh tính thành công! Huy hiệu Tích Xanh chính chủ đã được kích hoạt.', 'success');
   };
 
   const loginUser = (email: string) => {
@@ -1037,6 +1120,50 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     addToast('Đã cập nhật Mô tả bản thân & Portfolio năng lực thành công!', 'success');
   };
 
+  // Bookmark / Saved Profiles Handlers
+  const toggleSaveFreelancer = (freelancerId: string) => {
+    setSavedFreelancerIds((prev) => {
+      const isSaved = prev.includes(freelancerId);
+      const next = isSaved ? prev.filter((id) => id !== freelancerId) : [...prev, freelancerId];
+      if (isSaved) {
+        addToast('Đã bỏ lưu Freelancer khỏi danh sách quan tâm.', 'info');
+      } else {
+        addToast('✓ Đã lưu Freelancer vào Danh Sách Tiềm Năng!', 'success');
+      }
+      return next;
+    });
+  };
+
+  const toggleSaveEmployer = (employerId: string) => {
+    setSavedEmployerIds((prev) => {
+      const isSaved = prev.includes(employerId);
+      const next = isSaved ? prev.filter((id) => id !== employerId) : [...prev, employerId];
+      if (isSaved) {
+        addToast('Đã bỏ lưu Nhà tuyển dụng.', 'info');
+      } else {
+        addToast('✓ Đã lưu Nhà Tuyển Dụng vào Danh Sách Theo Dõi!', 'success');
+      }
+      return next;
+    });
+  };
+
+  const toggleSaveProject = (projectId: string) => {
+    setSavedProjectIds((prev) => {
+      const isSaved = prev.includes(projectId);
+      const next = isSaved ? prev.filter((id) => id !== projectId) : [...prev, projectId];
+      if (isSaved) {
+        addToast('Đã bỏ lưu dự án.', 'info');
+      } else {
+        addToast('✓ Đã lưu Dự Án vào Danh Sách Theo Dõi!', 'success');
+      }
+      return next;
+    });
+  };
+
+  const isFreelancerSaved = (id: string) => savedFreelancerIds.includes(id);
+  const isEmployerSaved = (id: string) => savedEmployerIds.includes(id);
+  const isProjectSaved = (id: string) => savedProjectIds.includes(id);
+
   return (
     <DemoContext.Provider
       value={{
@@ -1086,6 +1213,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         verifyEmail,
         resendVerificationEmail,
         changeVerificationEmail,
+        submitKyc,
         loginUser,
         loginWithGoogle,
         completeGoogleRegister,
@@ -1104,7 +1232,16 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         fileDispute,
         resolveDispute,
         submitReview,
-        updateFreelancerBioAndPortfolio
+        updateFreelancerBioAndPortfolio,
+        savedFreelancerIds,
+        savedEmployerIds,
+        savedProjectIds,
+        toggleSaveFreelancer,
+        toggleSaveEmployer,
+        toggleSaveProject,
+        isFreelancerSaved,
+        isEmployerSaved,
+        isProjectSaved
       }}
     >
       {children}

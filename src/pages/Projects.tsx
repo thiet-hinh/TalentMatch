@@ -16,7 +16,9 @@ import {
   SlidersHorizontal,
   ChevronRight,
   ChevronDown,
-  Users
+  Users,
+  Heart,
+  Building2
 } from 'lucide-react';
 
 interface CategoryConfig {
@@ -92,7 +94,15 @@ const POPULAR_SKILLS = [
 ];
 
 export const Projects: React.FC = () => {
-  const { projects, submitProposal, currentUser } = useDemo();
+  const {
+    projects,
+    submitProposal,
+    currentUser,
+    toggleSaveProject,
+    toggleSaveEmployer,
+    isProjectSaved,
+    isEmployerSaved
+  } = useDemo();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Filter States
@@ -602,35 +612,74 @@ export const Projects: React.FC = () => {
                         {proj.title}
                       </h3>
 
-                      {/* Employer Info */}
-                      <div className="flex items-center space-x-2 text-xs text-slate-600">
-                        <img
-                          src={proj.employerAvatar}
-                          alt={proj.employerName}
-                          className="w-5 h-5 rounded-full object-cover border border-slate-200"
-                        />
-                        <span className="font-bold text-slate-800">{proj.employerName}</span>
-                        {proj.employerCompany && (
-                          <span className="text-slate-500">({proj.employerCompany})</span>
-                        )}
+                      {/* Employer Info & Save Employer Button */}
+                      <div className="flex items-center gap-2 flex-wrap text-xs text-slate-600">
+                        <div className="flex items-center space-x-1.5">
+                          <img
+                            src={proj.employerAvatar}
+                            alt={proj.employerName}
+                            className="w-5 h-5 rounded-full object-cover border border-slate-200"
+                          />
+                          <span className="font-bold text-slate-800">{proj.employerName}</span>
+                          {proj.employerCompany && (
+                            <span className="text-slate-500">({proj.employerCompany})</span>
+                          )}
+                        </div>
+
                         {proj.employerVerified && (
                           <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded font-bold">
                             <CheckCircle2 className="w-2.5 h-2.5" />
                             <span>Doanh nghiệp xác thực</span>
                           </span>
                         )}
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSaveEmployer(proj.employerId);
+                          }}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md border transition-all cursor-pointer flex items-center gap-1 ${
+                            isEmployerSaved(proj.employerId)
+                              ? 'bg-blue-50 text-blue-700 border-blue-300'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                          }`}
+                          title={isEmployerSaved(proj.employerId) ? 'Bỏ lưu nhà tuyển dụng' : 'Lưu nhà tuyển dụng này'}
+                        >
+                          <Building2 className="w-3 h-3" />
+                          <span>{isEmployerSaved(proj.employerId) ? '✓ Đã lưu Cty' : '+ Lưu Cty'}</span>
+                        </button>
                       </div>
                     </div>
 
-                    {/* Budget Badge */}
-                    <div className="text-right shrink-0 bg-slate-50 p-4 rounded-2xl border border-slate-200 min-w-[180px]">
-                      <div className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Ngân sách dự kiến:</div>
-                      <div className="text-xl sm:text-2xl font-black text-blue-700 mt-0.5">
-                        {proj.budget.toLocaleString('vi-VN')} đ
-                      </div>
-                      <div className="text-[11px] text-emerald-700 font-bold mt-1 flex items-center justify-end gap-1">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Hình thức: {proj.budgetType === 'FIXED' ? 'Trọn gói' : 'Cột mốc Escrow'}</span>
+                    {/* Budget Badge & Project Bookmark Button */}
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2 shrink-0">
+                      <div className="text-right shrink-0 bg-slate-50 p-4 rounded-2xl border border-slate-200 min-w-[180px]">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Ngân sách:</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSaveProject(proj.id);
+                            }}
+                            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                              isProjectSaved(proj.id)
+                                ? 'bg-rose-50 border-rose-300 text-rose-600'
+                                : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500'
+                            }`}
+                            title={isProjectSaved(proj.id) ? 'Bỏ lưu dự án' : 'Lưu dự án để theo dõi'}
+                          >
+                            <Heart className={`w-3.5 h-3.5 ${isProjectSaved(proj.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
+                          </button>
+                        </div>
+                        <div className="text-xl sm:text-2xl font-black text-blue-700 mt-0.5">
+                          {proj.budget.toLocaleString('vi-VN')} đ
+                        </div>
+                        <div className="text-[11px] text-emerald-700 font-bold mt-1 flex items-center justify-end gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Hình thức: {proj.budgetType === 'FIXED' ? 'Trọn gói' : 'Cột mốc Escrow'}</span>
+                        </div>
                       </div>
                     </div>
                   </div>

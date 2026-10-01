@@ -17,7 +17,12 @@ import {
   X,
   Tag,
   Sparkles,
-  Check
+  Check,
+  Bookmark,
+  Building2,
+  Heart,
+  Trash2,
+  CheckCircle2
 } from 'lucide-react';
 
 const PRESET_SKILLS = [
@@ -60,13 +65,18 @@ export const FreelancerDashboard: React.FC = () => {
     proposals,
     projects,
     currentUser,
+    users,
     freelancers,
     deliverWork,
     updateFreelancerBioAndPortfolio,
-    openWithdrawModal
+    openWithdrawModal,
+    savedEmployerIds,
+    savedProjectIds,
+    toggleSaveEmployer,
+    toggleSaveProject
   } = useDemo();
 
-  const [activeTab, setActiveTab] = useState<'orders' | 'proposals' | 'profile'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'proposals' | 'saved' | 'profile'>('orders');
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDeliverModal, setShowDeliverModal] = useState(false);
@@ -94,6 +104,9 @@ export const FreelancerDashboard: React.FC = () => {
     (o) => o.freelancerId === 'free-1' || o.freelancerId === 'free-2' || o.freelancerId === currentUser.id
   );
   const myProposals = proposals.filter((p) => p.freelancerId === 'free-1' || p.freelancerId === currentUser.id);
+
+  const savedEmployers = users.filter((u) => u.role === 'employer' && savedEmployerIds.includes(u.id));
+  const savedProjectsList = projects.filter((p) => savedProjectIds.includes(p.id));
 
   const activeOrders = myOrders.filter((o) => o.status === 'ORDER_IN_PROGRESS' || o.status === 'REVISION_REQUESTED');
   const deliveredOrders = myOrders.filter((o) => o.status === 'DELIVERED');
@@ -225,6 +238,18 @@ export const FreelancerDashboard: React.FC = () => {
         >
           <Send className="w-4 h-4" />
           <span>Báo Giá Đã Gửi ({myProposals.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('saved')}
+          className={`py-3 px-6 border-b-2 flex items-center gap-2 transition-all ${
+            activeTab === 'saved'
+              ? 'border-blue-600 text-blue-600 font-extrabold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Bookmark className="w-4 h-4" />
+          <span>Nhà Tuyển Dụng & Dự Án Đã Lưu ({savedEmployers.length + savedProjectsList.length})</span>
         </button>
 
         <button
@@ -360,7 +385,214 @@ export const FreelancerDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: UPDATE BIO & PORTFOLIO */}
+      {/* TAB 3: SAVED EMPLOYERS & PROJECTS */}
+      {activeTab === 'saved' && (
+        <div className="space-y-8 animate-in fade-in duration-150">
+          
+          {/* Section 1: Saved Employers */}
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 lg:p-8 space-y-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="font-extrabold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-blue-600" />
+                  <span>Doanh Nghiệp / Nhà Tuyển Dụng Đã Lưu ({savedEmployers.length})</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Danh sách các công ty và khách hàng tiềm năng bạn đã đánh dấu để theo dõi cơ hội việc làm mới.
+                </p>
+              </div>
+
+              <Link
+                to="/projects"
+                className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 self-start sm:self-auto"
+              >
+                <span>Khám phá thêm dự án</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {savedEmployers.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <Building2 className="w-10 h-10 text-slate-300 mx-auto" />
+                <div className="font-bold text-slate-700 text-xs">Bạn chưa lưu Nhà tuyển dụng nào</div>
+                <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                  Khi xem các dự án tuyển dụng, bạn có thể bấm nút Lưu Doanh Nghiệp để tiện theo dõi các đợt tuyển dụng sau.
+                </p>
+                <Link
+                  to="/projects"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs"
+                >
+                  <span>Xem dự án đang tuyển</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {savedEmployers.map((emp) => {
+                  const empProjects = projects.filter((p) => p.employerId === emp.id || p.employerName === emp.name);
+                  return (
+                    <div
+                      key={emp.id}
+                      className="p-5 bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200 hover:border-blue-300 transition-all flex flex-col justify-between space-y-4 hover:shadow-md"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center space-x-3.5">
+                          <img
+                            src={emp.avatar}
+                            alt={emp.name}
+                            className="w-12 h-12 rounded-2xl object-cover border border-slate-200 ring-2 ring-blue-500/20 shadow-2xs"
+                          />
+                          <div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h3 className="font-extrabold text-slate-900 text-sm">{emp.companyName || emp.name}</h3>
+                              {emp.isVerified && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] text-blue-700 bg-blue-100 font-bold px-1.5 py-0.2 rounded-md">
+                                  <CheckCircle2 className="w-3 h-3 text-blue-600" />
+                                  <span>Tín nhiệm</span>
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-medium mt-0.5">
+                              Đại diện: <strong className="text-slate-700">{emp.name}</strong> • MST: <span className="font-mono">{emp.taxCode || '0101234567'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => toggleSaveEmployer(emp.id)}
+                          className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                          title="Bỏ lưu nhà tuyển dụng"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+                        <div className="text-[11px] text-slate-600">
+                          Đang có <strong className="text-blue-700 font-bold">{empProjects.length}</strong> dự án đăng tuyển
+                        </div>
+
+                        <Link
+                          to={`/projects?search=${encodeURIComponent(emp.companyName || emp.name)}`}
+                          className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold text-[11px] rounded-xl transition-all flex items-center gap-1"
+                        >
+                          <span>Xem việc làm</span>
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Saved Projects */}
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 lg:p-8 space-y-6 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="font-extrabold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+                  <Heart className="w-5 h-5 text-rose-500 fill-rose-500" />
+                  <span>Dự Án Tuyển Dụng Đã Lưu ({savedProjectsList.length})</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Các bài đăng dự án bạn quan tâm để chuẩn bị hồ sơ chào giá phù hợp nhất.
+                </p>
+              </div>
+
+              <Link
+                to="/projects"
+                className="text-xs text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1 self-start sm:self-auto"
+              >
+                <span>Xem tất cả dự án</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {savedProjectsList.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <Heart className="w-10 h-10 text-slate-300 mx-auto" />
+                <div className="font-bold text-slate-700 text-xs">Bạn chưa lưu Dự án nào</div>
+                <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                  Duyệt danh sách Dự án Tuyển Dụng và nhấn nút Tim / Bookmark để lưu vào danh sách này.
+                </p>
+                <Link
+                  to="/projects"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-xs"
+                >
+                  <span>Duyệt dự án ngay</span>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                {savedProjectsList.map((prj) => (
+                  <div
+                    key={prj.id}
+                    className="p-5 bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200 hover:border-blue-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-md"
+                  >
+                    <div className="space-y-2 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">
+                          {prj.category}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">#{prj.id}</span>
+                        <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                          Escrow Bảo Chứng
+                        </span>
+                      </div>
+
+                      <h3 className="font-black text-slate-900 text-sm hover:text-blue-600 transition-colors">
+                        {prj.title}
+                      </h3>
+
+                      <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                        {prj.description}
+                      </p>
+
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {prj.requiredSkills.map((sk) => (
+                          <span key={sk} className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-semibold text-slate-600">
+                            {sk}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex md:flex-col items-center md:items-end justify-between gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200">
+                      <div className="text-right">
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Ngân sách</div>
+                        <div className="text-base font-black text-blue-700 font-mono">
+                          {prj.budget.toLocaleString('vi-VN')} đ
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleSaveProject(prj.id)}
+                          className="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+                          title="Bỏ lưu dự án"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+
+                        <Link
+                          to={`/projects`}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl transition-all shadow-xs flex items-center gap-1.5"
+                        >
+                          <span>Gửi Báo Giá</span>
+                          <Send className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
+      )}
+
+      {/* TAB 4: UPDATE BIO & PORTFOLIO */}
       {activeTab === 'profile' && (
         <div className="bg-white rounded-3xl border border-slate-200 p-6 lg:p-8 space-y-6 shadow-xs">
           <div>

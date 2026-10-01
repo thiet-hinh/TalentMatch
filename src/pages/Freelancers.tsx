@@ -16,7 +16,8 @@ import {
   ChevronDown,
   ArrowUpDown,
   Send,
-  Eye
+  Eye,
+  Heart
 } from 'lucide-react';
 
 interface CategoryConfig {
@@ -94,7 +95,14 @@ const POPULAR_SKILLS = [
 ];
 
 export const Freelancers: React.FC = () => {
-  const { freelancers, projects, currentUser, addToast } = useDemo();
+  const {
+    freelancers,
+    projects,
+    currentUser,
+    addToast,
+    toggleSaveFreelancer,
+    isFreelancerSaved
+  } = useDemo();
 
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -667,11 +675,29 @@ export const Freelancers: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Badge */}
-                      <span className="bg-amber-100 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-xl border border-amber-300 flex items-center gap-1">
-                        <Award className="w-3 h-3 text-amber-600" />
-                        <span>{free.talentCreditBadge}</span>
-                      </span>
+                      {/* Badge & Bookmark Button */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSaveFreelancer(free.id);
+                          }}
+                          className={`p-2 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+                            isFreelancerSaved(free.id)
+                              ? 'bg-rose-50 border-rose-300 text-rose-600 ring-2 ring-rose-500/20'
+                              : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-rose-50/50'
+                          }`}
+                          title={isFreelancerSaved(free.id) ? 'Bỏ lưu Freelancer' : 'Lưu nhanh Freelancer vào danh sách quan tâm'}
+                        >
+                          <Heart className={`w-3.5 h-3.5 ${isFreelancerSaved(free.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
+                        </button>
+
+                        <span className="bg-amber-100 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-xl border border-amber-300 flex items-center gap-1">
+                          <Award className="w-3 h-3 text-amber-600" />
+                          <span>{free.talentCreditBadge}</span>
+                        </span>
+                      </div>
                     </div>
 
                     {/* Stats Pill Row */}

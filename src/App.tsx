@@ -19,6 +19,7 @@ import { FreelancerDashboard } from './pages/FreelancerDashboard';
 import { EmployerDashboard } from './pages/EmployerDashboard';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { OrderWorkManagement } from './pages/OrderWorkManagement';
+import { KycVerification } from './pages/KycVerification';
 
 const AppContent: React.FC = () => {
   const { isVNPayModalOpen, vnpayModalParams, closeVNPayModal } = useDemo();
@@ -35,6 +36,7 @@ const AppContent: React.FC = () => {
           <Route path="/projects" element={<Projects />} />
           <Route path="/freelancers" element={<Freelancers />} />
           <Route path="/create-project" element={<CreateProject />} />
+          <Route path="/kyc" element={<KycVerification />} />
           <Route path="/freelancer/dashboard" element={<FreelancerDashboard />} />
           <Route path="/employer/dashboard" element={<EmployerDashboard />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

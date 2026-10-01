@@ -19,8 +19,9 @@ import {
   CheckCheck,
   ArrowRight,
   Clock,
-  CircleDollarSign,
-  FileCheck2
+  FileCheck2,
+  ShieldCheck,
+  CircleDollarSign
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -492,6 +493,27 @@ export const Navbar: React.FC = () => {
                         <UserIcon className="w-4 h-4 text-sky-400" />
                         <span>Xem Thông Tin Cá Nhân Chi Tiết</span>
                       </button>
+
+                      {/* Direct eKYC Link */}
+                      <Link
+                        to="/kyc"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-neutral-900 hover:text-white transition-all text-left cursor-pointer font-bold text-sky-400"
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <ShieldCheck className="w-4 h-4 text-sky-400" />
+                          <span>Xác Minh eKYC Danh Tính</span>
+                        </div>
+                        {currentUser.isVerified ? (
+                          <span className="text-[10px] text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full font-bold border border-emerald-800/60">
+                            ✓ Đã xác thực
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-amber-400 bg-amber-950/80 px-2 py-0.5 rounded-full font-bold border border-amber-800/60 animate-pulse">
+                            ! Cần eKYC
+                          </span>
+                        )}
+                      </Link>
 
                       {/* Go to role Dashboard */}
                       {currentUser.role === 'employer' && (

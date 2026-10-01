@@ -23,7 +23,11 @@ import {
   Plus,
   Trash2,
   Building,
-  ChevronDown
+  ChevronDown,
+  FileCheck2,
+  Camera,
+  Upload,
+  Sparkles
 } from 'lucide-react';
 
 const VIETNAM_BANKS = [
@@ -45,6 +49,7 @@ export const UserProfileModal: React.FC = () => {
     closeUserProfileModal,
     openWithdrawModal,
     verifyEmail,
+    submitKyc,
     addBankAccount,
     removeBankAccount,
     logout,
@@ -57,6 +62,14 @@ export const UserProfileModal: React.FC = () => {
   const [selectedBankName, setSelectedBankName] = useState(VIETNAM_BANKS[0].name);
   const [accountNumber, setAccountNumber] = useState('');
   const [accountHolder, setAccountHolder] = useState(currentUser.name.toUpperCase());
+
+  // eKYC State
+  const [showKycForm, setShowKycForm] = useState(false);
+  const [kycFullName, setKycFullName] = useState(currentUser.name);
+  const [kycIdNumber, setKycIdNumber] = useState('001202008899');
+  const [kycCompanyName, setKycCompanyName] = useState(currentUser.companyName || 'Công ty TNHH Công Nghệ & Dịch Vụ Số');
+  const [kycTaxCode, setKycTaxCode] = useState(currentUser.taxCode || '0109887766');
+  const [isVerifyingKyc, setIsVerifyingKyc] = useState(false);
 
   if (!isUserProfileModalOpen) return null;
 
@@ -75,6 +88,21 @@ export const UserProfileModal: React.FC = () => {
 
     setAccountNumber('');
     setShowAddBank(false);
+  };
+
+  const handleKycSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsVerifyingKyc(true);
+    setTimeout(() => {
+      submitKyc({
+        idNumber: kycIdNumber,
+        fullName: kycFullName,
+        companyName: currentUser.role === 'employer' ? kycCompanyName : undefined,
+        taxCode: currentUser.role === 'employer' ? kycTaxCode : undefined
+      });
+      setIsVerifyingKyc(false);
+      setShowKycForm(false);
+    }, 1200);
   };
 
   // Find matching freelancer profile if user is freelancer
@@ -241,6 +269,249 @@ export const UserProfileModal: React.FC = () => {
                 <span className="font-bold text-slate-900">{currentUser.lastLogin || 'Vừa truy cập'}</span>
               </div>
             </div>
+          </div>
+
+          {/* eKYC Identity & Business Verification Section */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                <span>
+                  {currentUser.role === 'employer'
+                    ? 'Xác Minh Doanh Nghiệp eKYC (Pháp Nhân & MST)'
+                    : 'Xác Minh Danh Tính eKYC (CCCD Gắn Chip)'}
+                </span>
+              </h3>
+
+              {currentUser.isVerified ? (
+                <span className="text-[11px] font-black text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Đã Xác Minh Chính Chủ</span>
+                </span>
+              ) : (
+                <span className="text-[11px] font-black text-amber-700 bg-amber-50 border border-amber-300 px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Chưa Xác Minh</span>
+                </span>
+              )}
+            </div>
+
+            {/* Case 1: Already Verified Banner */}
+            {currentUser.isVerified && !showKycForm ? (
+              <div className="p-4 bg-gradient-to-r from-blue-50/80 via-emerald-50/50 to-white rounded-2xl border border-blue-200/80 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-2xs">
+                      <FileCheck2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                        <span>
+                          {currentUser.role === 'employer'
+                            ? 'Pháp Nhân Doanh Nghiệp Đã Được Thẩm Định Hợp Chuẩn'
+                            : 'Căn Cước Công Dân Gắn Chip Đã Xác Thực'}
+                        </span>
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+                      </div>
+                      <div className="text-[11px] text-slate-600 mt-0.5">
+                        Tích Xanh uy tín đã kích hoạt trên toàn sàn TalentMatch & Cổng ký quỹ Escrow VNPAY.
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowKycForm(true)}
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-white border border-blue-200 px-2.5 py-1 rounded-xl shadow-2xs transition-all cursor-pointer shrink-0"
+                  >
+                    Xem / Cập nhật
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-blue-100 text-[11px]">
+                  {currentUser.role === 'employer' ? (
+                    <>
+                      <div>Tên công ty: <strong className="text-slate-800">{currentUser.companyName || 'Công ty TNHH Giải Pháp Số'}</strong></div>
+                      <div>Mã số thuế: <strong className="font-mono text-slate-800">{currentUser.taxCode || '0101234567'}</strong></div>
+                      <div>Đại diện pháp luật: <strong className="text-slate-800">{currentUser.name}</strong></div>
+                      <div>Trạng thái: <span className="text-emerald-700 font-bold">Đối soát Tổng Cục Thuế hợp lệ</span></div>
+                    </>
+                  ) : (
+                    <>
+                      <div>Loại giấy tờ: <strong className="text-slate-800">CCCD 12 Số (Gắn chip)</strong></div>
+                      <div>Số định danh: <strong className="font-mono text-slate-800">001202****** (Đã ẩn)</strong></div>
+                      <div>Họ và tên: <strong className="text-slate-800">{currentUser.name.toUpperCase()}</strong></div>
+                      <div>Cấp độ định danh: <span className="text-emerald-700 font-bold">eKYC Cấp độ 2 (Full quyền)</span></div>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Case 2: Unverified Banner or Form Editing */}
+            {(!currentUser.isVerified || showKycForm) && (
+              <form onSubmit={handleKycSubmit} className="space-y-4 animate-in fade-in duration-150">
+                <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-2xl text-amber-900 text-xs space-y-1">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                    <ShieldCheck className="w-4 h-4 text-amber-600" />
+                    <span>
+                      {currentUser.role === 'employer'
+                        ? 'Yêu cầu xác minh Doanh nghiệp để kích hoạt bảo chứng Escrow'
+                        : 'Yêu cầu xác minh eKYC CCCD để nhận hợp đồng & rút tiền'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-amber-800 leading-relaxed">
+                    {currentUser.role === 'employer'
+                      ? 'Vui lòng cung cấp Mã số thuế và thông tin Người đại diện để hệ thống AI tự động đối soát với CSDL Đăng ký kinh doanh quốc gia.'
+                      : 'Hệ thống áp dụng công nghệ AI OCR đối soát trực tiếp Căn cước công dân gắn chip để đảm bảo tính an toàn cho giao dịch Escrow.'}
+                  </p>
+                </div>
+
+                {/* Form Fields for Employer */}
+                {currentUser.role === 'employer' ? (
+                  <div className="space-y-3 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Tên Doanh Nghiệp / Tổ Chức:</label>
+                        <input
+                          type="text"
+                          value={kycCompanyName}
+                          onChange={(e) => setKycCompanyName(e.target.value)}
+                          placeholder="VD: Công ty TNHH Giải Pháp Công Nghệ Số"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Mã Số Thuế (MST 10 hoặc 13 số):</label>
+                        <input
+                          type="text"
+                          value={kycTaxCode}
+                          onChange={(e) => setKycTaxCode(e.target.value)}
+                          placeholder="VD: 0109887766"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Họ tên Người đại diện pháp luật:</label>
+                        <input
+                          type="text"
+                          value={kycFullName}
+                          onChange={(e) => setKycFullName(e.target.value)}
+                          placeholder="VD: NGUYEN VAN A"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold uppercase focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Số CCCD Người đại diện:</label>
+                        <input
+                          type="text"
+                          value={kycIdNumber}
+                          onChange={(e) => setKycIdNumber(e.target.value)}
+                          placeholder="VD: 001202008899"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Upload Mock for Business License */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">Ảnh chụp Giấy phép ĐKKD / Đăng ký Doanh nghiệp:</label>
+                      <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-4 text-center bg-slate-50 hover:bg-blue-50/40 transition-colors cursor-pointer">
+                        <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
+                        <div className="text-xs font-bold text-slate-700">Tải lên file scan Giấy chứng nhận ĐKKD (PDF, JPG, PNG)</div>
+                        <div className="text-[10px] text-slate-500 mt-0.5">Tự động nhận diện bằng OCR trong vòng 2 giây</div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Form Fields for Freelancer (Employee) */
+                  <div className="space-y-3 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Họ và tên theo CCCD (Chính chủ):</label>
+                        <input
+                          type="text"
+                          value={kycFullName}
+                          onChange={(e) => setKycFullName(e.target.value)}
+                          placeholder="VD: NGUYEN VAN A"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold uppercase focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">Số Căn cước công dân (12 số):</label>
+                        <input
+                          type="text"
+                          value={kycIdNumber}
+                          onChange={(e) => setKycIdNumber(e.target.value)}
+                          placeholder="VD: 001202008899"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* CCCD Front & Back Mock Upload Box */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-3.5 text-center bg-slate-50 hover:bg-blue-50/40 transition-colors cursor-pointer">
+                        <Camera className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+                        <div className="text-xs font-bold text-slate-700">Mặt trước CCCD</div>
+                        <div className="text-[10px] text-slate-500 mt-0.5">Chụp rõ khuôn mặt & số định danh</div>
+                      </div>
+
+                      <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-3.5 text-center bg-slate-50 hover:bg-blue-50/40 transition-colors cursor-pointer">
+                        <Camera className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+                        <div className="text-xs font-bold text-slate-700">Mặt sau CCCD (Chip & MRZ)</div>
+                        <div className="text-[10px] text-slate-500 mt-0.5">Chụp rõ mã quét chip điện tử</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  {currentUser.isVerified && (
+                    <button
+                      type="button"
+                      onClick={() => setShowKycForm(false)}
+                      className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
+                    >
+                      Hủy bỏ
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isVerifyingKyc}
+                    className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-extrabold text-xs rounded-xl transition-all shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    {isVerifyingKyc ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Đang thẩm định AI OCR...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>
+                          {currentUser.role === 'employer'
+                            ? 'Xác Thực Doanh Nghiệp eKYC Ngay'
+                            : 'Gửi Hồ Sơ & Kích Hoạt Tích Xanh eKYC'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           {/* Bank Accounts for Withdrawal Section */}
