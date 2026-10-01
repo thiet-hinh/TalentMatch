@@ -7,7 +7,8 @@ import type {
   Review,
   Dispute,
   VNPayTransaction,
-  AppNotification
+  AppNotification,
+  ProjectInvitation
 } from '../types';
 
 export const GUEST_USER: User = {
@@ -930,10 +931,21 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
     timeAgo: '1 ngày trước'
   },
 
-  // For Freelancer Nguyễn Minh Anh (usr-fl-1)
+  // For Freelancer Nguyễn Minh Anh (usr-free-1)
+  {
+    id: 'notif-inv-1',
+    userId: 'usr-free-1',
+    title: 'Lời mời nhận dự án mới từ Lê Thu Hà (TechStartup VN)',
+    message: 'Doanh nghiệp đã gửi lời mời bạn tham gia dự án "Xây dựng Website Thương mại điện tử B2B Nông sản" với ngân sách 15.000.000 đ.',
+    type: 'INVITATION',
+    link: '/freelancer/dashboard',
+    isRead: false,
+    createdAt: '2026-09-28 11:30:00',
+    timeAgo: 'Vừa xong'
+  },
   {
     id: 'notif-5',
-    userId: 'usr-fl-1',
+    userId: 'usr-free-1',
     title: 'Nhà tuyển dụng đã duyệt báo giá của bạn!',
     message: 'Lê Thu Hà (TechStartup Việt Nam) đã chấp nhận báo giá cho dự án AI Chatbot và nạp cọc 100% vào Escrow.',
     type: 'CONTRACT',
@@ -944,7 +956,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'notif-6',
-    userId: 'usr-fl-1',
+    userId: 'usr-free-1',
     title: 'Giải ngân thù lao Escrow thành công',
     message: 'Số tiền 12.000.000 đ từ Hợp đồng TM-CTR-2026-001 đã được cộng trực tiếp vào Số dư Ví của bạn.',
     type: 'ESCROW',
@@ -955,7 +967,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'notif-7',
-    userId: 'usr-fl-1',
+    userId: 'usr-free-1',
     title: 'Đánh giá 5.0★ mới & +20 Điểm TalentCredit',
     message: 'Khách hàng vừa để lại nhận xét xuất sắc về thái độ làm việc chuyên nghiệp và tiến độ chuẩn.',
     type: 'REVIEW',
@@ -966,7 +978,7 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   },
   {
     id: 'notif-8',
-    userId: 'usr-fl-1',
+    userId: 'usr-free-1',
     title: 'Dự án mới phù hợp với kỹ năng Flutter',
     message: 'Có 2 dự án mới đăng tuyển thuộc ngành IT & Lập trình Web/App đang tìm kiếm chuyên gia như bạn.',
     type: 'SYSTEM',
@@ -976,10 +988,21 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
     timeAgo: 'Hôm qua'
   },
 
-  // For Freelancer Trần Hoàng Nam (usr-fl-2)
+  // For Freelancer Trần Hoàng Nam (usr-free-2)
+  {
+    id: 'notif-inv-2',
+    userId: 'usr-free-2',
+    title: 'Lời mời nhận dự án mới từ Phạm Tuấn Anh (Invest Growth)',
+    message: 'Doanh nghiệp đã gửi lời mời bạn tham gia dự án "Thiết kế Bộ nhận diện thương hiệu & UI/UX Mobile App" với ngân sách 8.500.000 đ.',
+    type: 'INVITATION',
+    link: '/freelancer/dashboard',
+    isRead: false,
+    createdAt: '2026-09-28 09:00:00',
+    timeAgo: '2 giờ trước'
+  },
   {
     id: 'notif-9',
-    userId: 'usr-fl-2',
+    userId: 'usr-free-2',
     title: 'Báo giá dự án Chuỗi Nhà Hàng Chay được quan tâm',
     message: 'Nhà tuyển dụng đã xem hồ sơ Portfolio Behance của bạn và gửi phản hồi trao đổi chi tiết.',
     type: 'PROPOSAL',
@@ -1002,3 +1025,45 @@ export const INITIAL_NOTIFICATIONS: AppNotification[] = [
     timeAgo: '2 giờ trước'
   }
 ];
+
+export const INITIAL_INVITATIONS: ProjectInvitation[] = [
+  {
+    id: 'inv-1',
+    projectId: 'prj-1',
+    projectTitle: 'Xây dựng Website Thương mại điện tử B2B Nông sản (Next.js + Tailwind + Node.js)',
+    projectCategory: 'IT & Lập trình Web',
+    projectBudget: 15000000,
+    projectDeadline: '30 ngày',
+    projectDescription: 'Cần tìm chuyên gia Fullstack phát triển cổng giao dịch B2B kết nối nhà vườn với doanh nghiệp xuất khẩu, tích hợp thanh toán VNPay và bảo mật 2 lớp.',
+    employerId: 'usr-emp-1',
+    employerName: 'Lê Thu Hà',
+    employerCompany: 'Công ty Cổ phần TechStartup Việt Nam',
+    employerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=le-thu-ha',
+    freelancerId: 'free-1',
+    freelancerUserId: 'usr-free-1',
+    freelancerName: 'Nguyễn Minh Anh',
+    message: 'Chào Minh Anh, mình ấn tượng với dự án E-Commerce Nông sản Sạch trong Portfolio của bạn. Team mình muốn mời bạn trực tiếp phụ trách dự án B2B này!',
+    status: 'PENDING',
+    createdAt: '2026-09-28 11:30:00'
+  },
+  {
+    id: 'inv-2',
+    projectId: 'prj-2',
+    projectTitle: 'Thiết kế Bộ nhận diện thương hiệu & UI/UX Mobile App Giao hàng siêu tốc',
+    projectCategory: 'Thiết kế & Đồ họa',
+    projectBudget: 8500000,
+    projectDeadline: '20 ngày',
+    projectDescription: 'Cần thiết kế Design System trên Figma, trọn bộ hơn 40 màn hình chuẩn UX mobile app giao vận tốc hành.',
+    employerId: 'usr-emp-2',
+    employerName: 'Phạm Tuấn Anh',
+    employerCompany: 'Invest Growth Vietnam',
+    employerAvatar: 'https://api.dicebear.com/7.x/identicon/svg?seed=pham-tuan-anh',
+    freelancerId: 'free-2',
+    freelancerUserId: 'usr-free-2',
+    freelancerName: 'Trần Hoàng Nam',
+    message: 'Chào bạn, bên mình đang cần chuẩn hóa bộ nhận diện thương hiệu và hoàn thiện UI Mobile App, rất mong có cơ hội hợp tác cùng bạn.',
+    status: 'PENDING',
+    createdAt: '2026-09-28 09:00:00'
+  }
+];
+

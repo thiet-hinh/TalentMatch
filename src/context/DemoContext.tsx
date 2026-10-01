@@ -15,7 +15,8 @@ import type {
   PortfolioItem,
   WithdrawalRequest,
   AppNotification,
-  BankAccount
+  BankAccount,
+  ProjectInvitation
 } from '../types';
 import {
   GUEST_USER,
@@ -27,7 +28,8 @@ import {
   INITIAL_REVIEWS,
   INITIAL_DISPUTES,
   INITIAL_VNPAY_TRANSACTIONS,
-  INITIAL_NOTIFICATIONS
+  INITIAL_NOTIFICATIONS,
+  INITIAL_INVITATIONS
 } from '../data/mockData';
 
 interface Toast {
@@ -50,6 +52,7 @@ const STORAGE_KEY_NOTIFICATIONS = 'talentmatch_demo_notifications_v4';
 const STORAGE_KEY_SAVED_FREELANCERS = 'talentmatch_demo_saved_freelancers_v4';
 const STORAGE_KEY_SAVED_EMPLOYERS = 'talentmatch_demo_saved_employers_v4';
 const STORAGE_KEY_SAVED_PROJECTS = 'talentmatch_demo_saved_projects_v4';
+const STORAGE_KEY_INVITATIONS = 'talentmatch_demo_invitations_v4';
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -194,6 +197,12 @@ interface DemoContextType {
   isFreelancerSaved: (freelancerId: string) => boolean;
   isEmployerSaved: (employerId: string) => boolean;
   isProjectSaved: (projectId: string) => boolean;
+
+  // Project Invitations Flow
+  invitations: ProjectInvitation[];
+  sendProjectInvitation: (params: { projectId: string; freelancerId: string; message?: string }) => void;
+  acceptInvitation: (invitationId: string, responseNote?: string, customBid?: number) => void;
+  declineInvitation: (invitationId: string, reason?: string) => void;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
@@ -240,6 +249,11 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadFromStorage(STORAGE_KEY_SAVED_PROJECTS, ['prj-1', 'prj-2'])
   );
 
+  // Project Invitations State
+  const [invitations, setInvitations] = useState<ProjectInvitation[]>(() =>
+    loadFromStorage(STORAGE_KEY_INVITATIONS, INITIAL_INVITATIONS)
+  );
+
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
@@ -253,6 +267,9 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_SAVED_PROJECTS, JSON.stringify(savedProjectIds));
   }, [savedProjectIds]);
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_INVITATIONS, JSON.stringify(invitations));
+  }, [invitations]);
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_PROJECTS, JSON.stringify(projects));
   }, [projects]);
@@ -470,6 +487,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem(STORAGE_KEY_FREELANCERS);
     localStorage.removeItem(STORAGE_KEY_VNPAY);
     localStorage.removeItem(STORAGE_KEY_CONFIG);
+    localStorage.removeItem(STORAGE_KEY_INVITATIONS);
 
     setUsers(INITIAL_USERS);
     setCurrentUser(INITIAL_USERS[0]);
@@ -482,6 +500,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setFreelancers(FREELANCERS);
     setVnpayTransactions(INITIAL_VNPAY_TRANSACTIONS);
     setPlatformConfig(DEFAULT_CONFIG);
+    setInvitations(INITIAL_INVITATIONS);
 
     addToast('Đã khôi phục toàn bộ dữ liệu mẫu TalentMatch ban đầu!', 'info');
   };
@@ -1164,6 +1183,130 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const isEmployerSaved = (id: string) => savedEmployerIds.includes(id);
   const isProjectSaved = (id: string) => savedProjectIds.includes(id);
 
+  // Project Invitations Actions
+  const sendProjectInvitation = (params: {
+    projectId: string;
+    freelancerId: string;
+    message?: string;
+  }) => {
+    const project = projects.find((p) => p.id === params.projectId);
+    const targetFreelancer = freelancers.find((f) => f.id === params.freelancerId);
+    if (!project || !targetFreelancer) {
+      addToast('Không tìm thấy thông tin dự án hoặc freelancer!', 'error');
+      return;
+    }
+
+    const freelancerUserId = targetFreelancer.userId || 'usr-free-1';
+
+    const newInvitation: ProjectInvitation = {
+      id: `inv-${Date.now()}`,
+      projectId: project.id,
+      projectTitle: project.title,
+      projectCategory: project.category,
+      projectBudget: project.budget,
+      projectDeadline: project.deadline,
+      projectDescription: project.description,
+      employerId: currentUser.id,
+      employerName: currentUser.name,
+      employerCompany: currentUser.companyName || 'Doanh nghiệp tuyển dụng',
+      employerAvatar: currentUser.avatar,
+      freelancerId: targetFreelancer.id,
+      freelancerUserId: freelancerUserId,
+      freelancerName: targetFreelancer.name,
+      message:
+        params.message ||
+        `Chào ${targetFreelancer.name}, doanh nghiệp chúng tôi muốn mời bạn tham gia thực hiện dự án "${project.title}".`,
+      status: 'PENDING',
+      createdAt: new Date().toLocaleString('vi-VN')
+    };
+
+    setInvitations((prev) => [newInvitation, ...prev]);
+
+    // Send direct Notification to Freelancer
+    addNotification({
+      userId: freelancerUserId,
+      title: `Lời mời nhận dự án mới từ ${currentUser.name} (${currentUser.companyName || 'Nhà tuyển dụng'})`,
+      message: `Doanh nghiệp đã gửi lời mời bạn tham gia dự án "${project.title}" với ngân sách ${project.budget.toLocaleString('vi-VN')} đ.`,
+      type: 'INVITATION',
+      link: '/freelancer/dashboard'
+    });
+
+    addToast(`✓ Đã gửi lời mời tham gia dự án "${project.title}" đến ${targetFreelancer.name}!`, 'success');
+  };
+
+  const acceptInvitation = (invitationId: string, responseNote?: string, customBid?: number) => {
+    const invitation = invitations.find((i) => i.id === invitationId);
+    if (!invitation) return;
+
+    const updatedInvitations = invitations.map((i) =>
+      i.id === invitationId
+        ? { ...i, status: 'ACCEPTED' as const, respondedAt: new Date().toLocaleString('vi-VN') }
+        : i
+    );
+    setInvitations(updatedInvitations);
+
+    // Create a proposal for this project
+    const targetProject = projects.find((p) => p.id === invitation.projectId);
+    if (targetProject) {
+      const newProp: Proposal = {
+        id: `prop-inv-${Date.now()}`,
+        projectId: targetProject.id,
+        freelancerId: invitation.freelancerId,
+        freelancerName: invitation.freelancerName,
+        freelancerAvatar: currentUser.avatar || 'https://api.dicebear.com/7.x/identicon/svg?seed=freelancer',
+        freelancerTitle: currentUser.bio?.slice(0, 50) || 'Chuyên gia Freelancer Đã Xác Thực',
+        freelancerRating: 5.0,
+        freelancerCompletedCount: 1,
+        bidAmount: customBid || invitation.projectBudget,
+        estimatedDays: parseInt(invitation.projectDeadline || '14') || 14,
+        coverLetter: responseNote || 'Tôi đã tiếp nhận lời mời và đồng ý tham gia dự án với các tiêu chí đã trao đổi.',
+        status: 'ACCEPTED',
+        createdAt: new Date().toLocaleString('vi-VN')
+      };
+      setProposals((prev) => [newProp, ...prev]);
+    }
+
+    // Send notification to employer
+    addNotification({
+      userId: invitation.employerId,
+      title: `Freelancer ${invitation.freelancerName} đã CHẤP NHẬN lời mời dự án!`,
+      message: `Ứng viên đã đồng ý nhận dự án "${invitation.projectTitle}" và sẵn sàng bắt đầu công việc.`,
+      type: 'CONTRACT',
+      link: '/employer/dashboard'
+    });
+
+    addToast(`✓ Bạn đã chấp nhận lời mời dự án "${invitation.projectTitle}" thành công!`, 'success');
+  };
+
+  const declineInvitation = (invitationId: string, reason?: string) => {
+    const invitation = invitations.find((i) => i.id === invitationId);
+    if (!invitation) return;
+
+    const declineMsg = reason || 'Lịch trình hiện tại đã kín';
+    const updatedInvitations = invitations.map((i) =>
+      i.id === invitationId
+        ? {
+            ...i,
+            status: 'DECLINED' as const,
+            declineReason: declineMsg,
+            respondedAt: new Date().toLocaleString('vi-VN')
+          }
+        : i
+    );
+    setInvitations(updatedInvitations);
+
+    // Send notification to employer
+    addNotification({
+      userId: invitation.employerId,
+      title: `Freelancer ${invitation.freelancerName} đã từ chối lời mời dự án`,
+      message: `Ứng viên không thể tham gia dự án "${invitation.projectTitle}". Lý do: ${declineMsg}.`,
+      type: 'PROPOSAL',
+      link: '/employer/dashboard'
+    });
+
+    addToast(`Đã từ chối lời mời dự án "${invitation.projectTitle}".`, 'info');
+  };
+
   return (
     <DemoContext.Provider
       value={{
@@ -1241,7 +1384,11 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         toggleSaveProject,
         isFreelancerSaved,
         isEmployerSaved,
-        isProjectSaved
+        isProjectSaved,
+        invitations,
+        sendProjectInvitation,
+        acceptInvitation,
+        declineInvitation
       }}
     >
       {children}

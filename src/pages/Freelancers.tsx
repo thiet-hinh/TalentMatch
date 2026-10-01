@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useDemo } from '../context/DemoContext';
-import type { FreelancerProfile, PortfolioItem } from '../types';
+import type { FreelancerProfile, PortfolioItem, Project } from '../types';
 import {
   Search,
   Star,
@@ -101,7 +101,8 @@ export const Freelancers: React.FC = () => {
     currentUser,
     addToast,
     toggleSaveFreelancer,
-    isFreelancerSaved
+    isFreelancerSaved,
+    sendProjectInvitation
   } = useDemo();
 
   // Filter States
@@ -122,6 +123,7 @@ export const Freelancers: React.FC = () => {
   const [selectedFreelancer, setSelectedFreelancer] = useState<FreelancerProfile | null>(null);
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState<PortfolioItem | null>(null);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState('');
 
   // Toggle skills
   const handleToggleSkill = (skill: string) => {
@@ -273,11 +275,17 @@ export const Freelancers: React.FC = () => {
 
   const handleOpenInvite = (free: FreelancerProfile) => {
     setSelectedFreelancer(free);
+    setInviteMessage(`Chào ${free.name}, mình đại diện doanh nghiệp rất ấn tượng với profile của bạn và muốn mời bạn phụ trách dự án này.`);
     setShowInviteModal(true);
   };
 
-  const handleInviteToProject = (projectTitle: string) => {
-    addToast(`Đã gửi lời mời báo giá dự án "${projectTitle}" đến ${selectedFreelancer?.name}!`, 'success');
+  const handleInviteToProject = (proj: Project) => {
+    if (!selectedFreelancer) return;
+    sendProjectInvitation({
+      projectId: proj.id,
+      freelancerId: selectedFreelancer.id,
+      message: inviteMessage
+    });
     setShowInviteModal(false);
   };
 
@@ -897,11 +905,16 @@ export const Freelancers: React.FC = () => {
       {/* Invite Modal for Employer */}
       {showInviteModal && selectedFreelancer && (
         <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center space-x-2 text-indigo-700 font-black text-base">
-                <Send className="w-5 h-5 text-indigo-600" />
-                <span>Mời {selectedFreelancer.name} Báo Giá</span>
+              <div className="flex items-center space-x-2.5 text-indigo-700 font-black text-base">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center">
+                  <Send className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-slate-900 font-black text-sm">Gửi Lời Mời Nhận Dự Án</h3>
+                  <p className="text-[11px] text-slate-500 font-normal">Ứng viên: <strong className="text-indigo-600 font-bold">{selectedFreelancer.name}</strong></p>
+                </div>
               </div>
               <button
                 onClick={() => setShowInviteModal(false)}
@@ -912,35 +925,60 @@ export const Freelancers: React.FC = () => {
             </div>
 
             <div className="space-y-4 text-xs">
-              <p className="text-slate-600">
-                Chọn một trong các dự án đang mở tuyển dụng của bạn để gửi lời mời trực tiếp đến ứng viên:
-              </p>
+              <div>
+                <label className="block text-slate-700 font-bold text-xs mb-1.5">
+                  Tin nhắn / Lời nhắn gửi kèm:
+                </label>
+                <textarea
+                  value={inviteMessage}
+                  onChange={(e) => setInviteMessage(e.target.value)}
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none"
+                  placeholder="Nhập lời chào hoặc ghi chú đặc biệt cho ứng viên..."
+                />
+              </div>
 
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {projects
-                  .filter((p) => p.status === 'OPEN')
-                  .map((proj) => (
-                    <button
-                      key={proj.id}
-                      onClick={() => handleInviteToProject(proj.title)}
-                      className="w-full p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-2xl text-left transition-all space-y-1 cursor-pointer"
-                    >
-                      <div className="font-extrabold text-slate-900 text-xs line-clamp-1">{proj.title}</div>
-                      <div className="flex items-center justify-between text-[11px] text-slate-500">
-                        <span>Ngân sách: <strong className="text-blue-700">{proj.budget.toLocaleString('vi-VN')} đ</strong></span>
-                        <span className="text-indigo-600 font-bold">Gửi lời mời →</span>
-                      </div>
-                    </button>
-                  ))}
+              <div>
+                <label className="block text-slate-700 font-bold text-xs mb-1.5">
+                  Chọn 1 dự án đang tuyển của bạn để gửi lời mời:
+                </label>
+
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                  {projects
+                    .filter((p) => p.status === 'OPEN')
+                    .map((proj) => (
+                      <button
+                        key={proj.id}
+                        onClick={() => handleInviteToProject(proj)}
+                        className="w-full p-3.5 bg-slate-50 hover:bg-indigo-50/80 border border-slate-200 hover:border-indigo-400 rounded-2xl text-left transition-all space-y-1.5 cursor-pointer group"
+                      >
+                        <div className="font-extrabold text-slate-900 text-xs line-clamp-1 group-hover:text-indigo-700">
+                          {proj.title}
+                        </div>
+                        <div className="flex items-center justify-between text-[11px] text-slate-500">
+                          <span>Ngân sách: <strong className="text-blue-700 font-bold">{proj.budget.toLocaleString('vi-VN')} đ</strong></span>
+                          <span className="text-indigo-600 font-bold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                            <span>Gửi lời mời ngay</span>
+                            <span>→</span>
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  {projects.filter((p) => p.status === 'OPEN').length === 0 && (
+                    <div className="p-4 text-center text-slate-400 bg-slate-50 rounded-2xl">
+                      Bạn chưa có dự án nào đang ở trạng thái mở tuyển dụng.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-2">
+            <div className="flex items-center justify-end space-x-3 pt-2 border-t border-slate-100">
               <button
                 onClick={() => setShowInviteModal(false)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl cursor-pointer"
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl cursor-pointer transition-colors"
               >
-                Hủy
+                Đóng
               </button>
             </div>
           </div>

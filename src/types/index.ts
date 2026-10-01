@@ -216,15 +216,40 @@ export interface WithdrawalRequest {
   amount: number;
 }
 
+export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
+
+export interface ProjectInvitation {
+  id: string;
+  projectId: string;
+  projectTitle: string;
+  projectCategory?: string;
+  projectBudget: number;
+  projectDeadline?: string;
+  projectDescription?: string;
+  employerId: string;
+  employerName: string;
+  employerCompany?: string;
+  employerAvatar: string;
+  freelancerId: string; // e.g. 'free-1'
+  freelancerUserId: string; // e.g. 'usr-free-1'
+  freelancerName: string;
+  message?: string;
+  status: InvitationStatus;
+  createdAt: string;
+  respondedAt?: string;
+  declineReason?: string;
+}
+
 export interface AppNotification {
   id: string;
   userId: string; // 'all' or specific user id e.g. 'usr-emp-1'
   title: string;
   message: string;
-  type: 'ESCROW' | 'PROPOSAL' | 'CONTRACT' | 'WITHDRAWAL' | 'SYSTEM' | 'REVIEW';
+  type: 'ESCROW' | 'PROPOSAL' | 'CONTRACT' | 'WITHDRAWAL' | 'SYSTEM' | 'REVIEW' | 'INVITATION';
   link: string; // URL path to navigate to when clicked
   isRead: boolean;
   createdAt: string;
   timeAgo?: string;
 }
+
 

@@ -21,7 +21,8 @@ import {
   Clock,
   FileCheck2,
   ShieldCheck,
-  CircleDollarSign
+  CircleDollarSign,
+  Send
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -78,6 +79,8 @@ export const Navbar: React.FC = () => {
 
   const getNotifIcon = (type: string) => {
     switch (type) {
+      case 'INVITATION':
+        return <Send className="w-4 h-4 text-indigo-600" />;
       case 'ESCROW':
         return <CircleDollarSign className="w-4 h-4 text-emerald-600" />;
       case 'PROPOSAL':
@@ -96,6 +99,8 @@ export const Navbar: React.FC = () => {
 
   const getNotifBg = (type: string) => {
     switch (type) {
+      case 'INVITATION':
+        return 'bg-indigo-50 border-indigo-200';
       case 'ESCROW':
         return 'bg-emerald-50 border-emerald-200';
       case 'PROPOSAL':

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useDemo } from '../context/DemoContext';
-import type { Order } from '../types';
+import type { Order, ProjectInvitation } from '../types';
 import {
   Briefcase,
   Award,
@@ -22,7 +22,11 @@ import {
   Building2,
   Heart,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  Mail,
+  MessageSquare,
+  XCircle,
+  Clock
 } from 'lucide-react';
 
 const PRESET_SKILLS = [
@@ -60,6 +64,9 @@ const PRESET_SKILLS = [
 ];
 
 export const FreelancerDashboard: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'invitations' ? 'invitations' : 'orders';
+
   const {
     orders,
     proposals,
@@ -73,16 +80,36 @@ export const FreelancerDashboard: React.FC = () => {
     savedEmployerIds,
     savedProjectIds,
     toggleSaveEmployer,
-    toggleSaveProject
+    toggleSaveProject,
+    invitations,
+    acceptInvitation,
+    declineInvitation
   } = useDemo();
 
-  const [activeTab, setActiveTab] = useState<'orders' | 'proposals' | 'saved' | 'profile'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'proposals' | 'invitations' | 'saved' | 'profile'>(initialTab);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'invitations') {
+      setActiveTab('invitations');
+    }
+  }, [searchParams]);
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showDeliverModal, setShowDeliverModal] = useState(false);
   const [deliveryNote, setDeliveryNote] = useState('');
   const [demoUrl, setDemoUrl] = useState('https://demo-project.vercel.app');
   const [fileName, setFileName] = useState('SourceCode_Final_Deliverable_v1.0.zip');
+
+  // Invitations States & Modals
+  const [selectedInvitation, setSelectedInvitation] = useState<ProjectInvitation | null>(null);
+  const [showAcceptInviteModal, setShowAcceptInviteModal] = useState(false);
+  const [showDeclineInviteModal, setShowDeclineInviteModal] = useState(false);
+  const [acceptBidAmount, setAcceptBidAmount] = useState<number>(0);
+  const [acceptResponseNote, setAcceptResponseNote] = useState('');
+  const [declineReasonOption, setDeclineReasonOption] = useState('Lịch trình hiện tại đã kín');
+  const [customDeclineReason, setCustomDeclineReason] = useState('');
+  const [invitationFilter, setInvitationFilter] = useState<'ALL' | 'PENDING' | 'ACCEPTED' | 'DECLINED'>('ALL');
 
   // Find freelancer profile
   const myProfile =
@@ -105,11 +132,60 @@ export const FreelancerDashboard: React.FC = () => {
   );
   const myProposals = proposals.filter((p) => p.freelancerId === 'free-1' || p.freelancerId === currentUser.id);
 
+  const myInvitations = invitations.filter(
+    (inv) =>
+      inv.freelancerUserId === currentUser.id ||
+      inv.freelancerId === myProfile?.id ||
+      inv.freelancerName === currentUser.name ||
+      (currentUser.id === 'usr-free-1' && (inv.freelancerId === 'free-1' || inv.freelancerUserId === 'usr-free-1')) ||
+      (currentUser.id === 'usr-free-2' && (inv.freelancerId === 'free-2' || inv.freelancerUserId === 'usr-free-2'))
+  );
+  const pendingInvitations = myInvitations.filter((inv) => inv.status === 'PENDING');
+
+  const filteredInvitations = myInvitations.filter((inv) => {
+    if (invitationFilter === 'ALL') return true;
+    return inv.status === invitationFilter;
+  });
+
   const savedEmployers = users.filter((u) => u.role === 'employer' && savedEmployerIds.includes(u.id));
   const savedProjectsList = projects.filter((p) => savedProjectIds.includes(p.id));
 
   const activeOrders = myOrders.filter((o) => o.status === 'ORDER_IN_PROGRESS' || o.status === 'REVISION_REQUESTED');
   const deliveredOrders = myOrders.filter((o) => o.status === 'DELIVERED');
+
+  const handleOpenAcceptInvite = (inv: ProjectInvitation) => {
+    setSelectedInvitation(inv);
+    setAcceptBidAmount(inv.projectBudget);
+    setAcceptResponseNote(
+      `Chào ${inv.employerName}, tôi rất vinh hạnh nhận được lời mời và sẵn sàng bắt đầu triển khai dự án "${inv.projectTitle}" theo đúng tiến độ đề ra.`
+    );
+    setShowAcceptInviteModal(true);
+  };
+
+  const handleConfirmAcceptInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInvitation) return;
+    acceptInvitation(selectedInvitation.id, acceptResponseNote, acceptBidAmount);
+    setShowAcceptInviteModal(false);
+  };
+
+  const handleOpenDeclineInvite = (inv: ProjectInvitation) => {
+    setSelectedInvitation(inv);
+    setDeclineReasonOption('Lịch trình hiện tại đã kín');
+    setCustomDeclineReason('');
+    setShowDeclineInviteModal(true);
+  };
+
+  const handleConfirmDeclineInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedInvitation) return;
+    const finalReason =
+      declineReasonOption === 'Khác...'
+        ? customDeclineReason.trim() || 'Không phù hợp'
+        : declineReasonOption;
+    declineInvitation(selectedInvitation.id, finalReason);
+    setShowDeclineInviteModal(false);
+  };
 
   const handleOpenDeliver = (ord: Order) => {
     setSelectedOrder(ord);
@@ -238,6 +314,23 @@ export const FreelancerDashboard: React.FC = () => {
         >
           <Send className="w-4 h-4" />
           <span>Báo Giá Đã Gửi ({myProposals.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('invitations')}
+          className={`py-3 px-6 border-b-2 flex items-center gap-2 transition-all relative ${
+            activeTab === 'invitations'
+              ? 'border-indigo-600 text-indigo-600 font-extrabold'
+              : 'border-transparent text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          <Mail className="w-4 h-4" />
+          <span>Lời Mời Dự Án ({myInvitations.length})</span>
+          {pendingInvitations.length > 0 && (
+            <span className="bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+              {pendingInvitations.length}
+            </span>
+          )}
         </button>
 
         <button
@@ -382,6 +475,244 @@ export const FreelancerDashboard: React.FC = () => {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* TAB: INVITATIONS LIST */}
+      {activeTab === 'invitations' && (
+        <div className="bg-white rounded-3xl border border-slate-200 p-6 lg:p-8 space-y-6 shadow-xs animate-in fade-in duration-150">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+            <div>
+              <h2 className="font-extrabold text-slate-900 text-lg flex items-center gap-2">
+                <Mail className="w-5 h-5 text-indigo-600" />
+                <span>Lời Mời Nhận Dự Án Trực Tiếp Từ Nhà Tuyển Dụng</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Các doanh nghiệp đánh giá cao profile và portfolio của bạn và chủ động gửi lời mời giao việc trực tiếp.
+              </p>
+            </div>
+
+            {/* Filter Chips */}
+            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl shrink-0 self-start sm:self-auto text-xs font-bold">
+              <button
+                onClick={() => setInvitationFilter('ALL')}
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                  invitationFilter === 'ALL'
+                    ? 'bg-white text-indigo-700 shadow-xs font-black'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Tất cả ({myInvitations.length})
+              </button>
+              <button
+                onClick={() => setInvitationFilter('PENDING')}
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                  invitationFilter === 'PENDING'
+                    ? 'bg-amber-500 text-white shadow-xs font-black'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <span>Chờ phản hồi</span>
+                {pendingInvitations.length > 0 && (
+                  <span className="bg-white text-amber-800 text-[10px] font-black px-1.5 py-0.2 rounded-full">
+                    {pendingInvitations.length}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setInvitationFilter('ACCEPTED')}
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                  invitationFilter === 'ACCEPTED'
+                    ? 'bg-emerald-600 text-white shadow-xs font-black'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Đã đồng ý
+              </button>
+              <button
+                onClick={() => setInvitationFilter('DECLINED')}
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                  invitationFilter === 'DECLINED'
+                    ? 'bg-rose-600 text-white shadow-xs font-black'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Đã từ chối
+              </button>
+            </div>
+          </div>
+
+          {/* Invitations List */}
+          {filteredInvitations.length === 0 ? (
+            <div className="text-center py-12 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+              <Mail className="w-10 h-10 text-slate-300 mx-auto" />
+              <div className="font-bold text-slate-700 text-xs">Không có lời mời nào trong mục này</div>
+              <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                Khi Nhà tuyển dụng tìm thấy hồ sơ của bạn và gửi lời mời, thông tin sẽ xuất hiện ngay tại đây.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredInvitations.map((inv) => (
+                <div
+                  key={inv.id}
+                  className={`rounded-3xl border transition-all p-5 sm:p-6 space-y-4 ${
+                    inv.status === 'PENDING'
+                      ? 'bg-gradient-to-br from-indigo-50/40 via-white to-slate-50 border-indigo-200 hover:border-indigo-400 shadow-sm'
+                      : inv.status === 'ACCEPTED'
+                      ? 'bg-emerald-50/30 border-emerald-200'
+                      : 'bg-slate-50/70 border-slate-200 opacity-90'
+                  }`}
+                >
+                  {/* Header: Employer & Status */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={inv.employerAvatar}
+                        alt={inv.employerName}
+                        className="w-11 h-11 rounded-2xl border border-slate-200 bg-white p-0.5 object-cover"
+                      />
+                      <div>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                            {inv.employerCompany || inv.employerName}
+                          </span>
+                          <span className="inline-flex items-center text-[10px] text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.2 rounded-md font-bold">
+                            <CheckCircle2 className="w-3 h-3 text-blue-600 mr-0.5" />
+                            Đã xác thực
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                          <span>Người liên hệ: <strong className="text-slate-700">{inv.employerName}</strong></span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1 font-mono text-slate-400">
+                            <Clock className="w-3 h-3" />
+                            {inv.createdAt}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="shrink-0">
+                      {inv.status === 'PENDING' && (
+                        <span className="inline-flex items-center gap-1 text-xs font-extrabold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
+                          <Clock className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Đang chờ bạn phản hồi</span>
+                        </span>
+                      )}
+                      {inv.status === 'ACCEPTED' && (
+                        <span className="inline-flex items-center gap-1 text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>✓ Đã Đồng Ý Nhận Dự Án</span>
+                        </span>
+                      )}
+                      {inv.status === 'DECLINED' && (
+                        <span className="inline-flex items-center gap-1 text-xs font-extrabold px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300">
+                          <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                          <span>Đã Từ Chối</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Project Details */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">
+                        {inv.projectCategory || 'IT & Phần Mềm'}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-mono">Mã DA: #{inv.projectId}</span>
+                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        Escrow Bảo Chứng
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-black text-slate-900 leading-snug">
+                      {inv.projectTitle}
+                    </h3>
+
+                    {inv.projectDescription && (
+                      <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
+                        {inv.projectDescription}
+                      </p>
+                    )}
+
+                    {/* Employer Personal Message Box */}
+                    {inv.message && (
+                      <div className="bg-indigo-50/70 border border-indigo-200/80 rounded-2xl p-3.5 space-y-1">
+                        <div className="text-[11px] font-black text-indigo-900 flex items-center gap-1.5">
+                          <MessageSquare className="w-3.5 h-3.5 text-indigo-600" />
+                          <span>Lời nhắn từ Nhà Tuyển Dụng:</span>
+                        </div>
+                        <p className="text-xs text-indigo-950 font-medium italic leading-relaxed">
+                          "{inv.message}"
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Decline Reason if any */}
+                    {inv.status === 'DECLINED' && inv.declineReason && (
+                      <div className="bg-rose-50 border border-rose-200 rounded-2xl p-3 text-xs text-rose-800">
+                        <strong>Lý do từ chối:</strong> {inv.declineReason}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer: Budget + Action Buttons */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-slate-100">
+                    <div className="flex items-center gap-4 text-xs">
+                      <div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Ngân sách dự kiến</div>
+                        <div className="text-base font-black text-blue-700 font-mono">
+                          {inv.projectBudget.toLocaleString('vi-VN')} đ
+                        </div>
+                      </div>
+                      <div className="h-8 w-px bg-slate-200" />
+                      <div>
+                        <div className="text-[10px] text-slate-400 font-bold uppercase">Thời hạn bàn giao</div>
+                        <div className="text-xs font-bold text-slate-800">
+                          {inv.projectDeadline || 'Theo thỏa thuận'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2">
+                      {inv.status === 'PENDING' ? (
+                        <>
+                          <button
+                            onClick={() => handleOpenDeclineInvite(inv)}
+                            className="px-4 py-2.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-700 border border-slate-200 hover:border-rose-300 font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            <span>Từ Chối</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleOpenAcceptInvite(inv)}
+                            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-xs rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Check className="w-4 h-4" />
+                            <span>Xem Chi Tiết & Đồng Ý Nhận</span>
+                          </button>
+                        </>
+                      ) : inv.status === 'ACCEPTED' ? (
+                        <button
+                          onClick={() => setActiveTab('proposals')}
+                          className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>Xem Báo Giá Đã Kích Hoạt →</span>
+                        </button>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">Đã đóng lời mời</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -864,6 +1195,180 @@ export const FreelancerDashboard: React.FC = () => {
                 className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 rounded-xl text-xs shadow-md"
               >
                 Xác Nhận Nộp Bài Bàn Giao
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Accept Invitation Modal */}
+      {showAcceptInviteModal && selectedInvitation && (
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <form
+            onSubmit={handleConfirmAcceptInvite}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center space-x-2 text-emerald-700 font-bold text-base">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <span>Chấp Nhận Lời Mời Nhận Dự Án</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAcceptInviteModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="bg-indigo-50/80 p-4 rounded-2xl border border-indigo-200 space-y-1">
+                <div className="font-extrabold text-slate-900 text-xs line-clamp-1">
+                  {selectedInvitation.projectTitle}
+                </div>
+                <div className="text-slate-600 text-[11px]">
+                  Doanh nghiệp tuyển dụng: <strong>{selectedInvitation.employerCompany || selectedInvitation.employerName}</strong>
+                </div>
+                <div className="text-blue-700 font-bold text-xs pt-1">
+                  Ngân sách đề xuất: {selectedInvitation.projectBudget.toLocaleString('vi-VN')} đ
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5">
+                  Mức giá báo giá của bạn (VND):
+                </label>
+                <input
+                  type="number"
+                  value={acceptBidAmount}
+                  onChange={(e) => setAcceptBidAmount(Number(e.target.value))}
+                  className="w-full p-3 border border-slate-300 rounded-xl text-xs font-mono font-bold focus:ring-2 focus:ring-blue-600"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5">
+                  Ghi chú / Lời nhắn xác nhận gửi Nhà Tuyển Dụng:
+                </label>
+                <textarea
+                  rows={3}
+                  value={acceptResponseNote}
+                  onChange={(e) => setAcceptResponseNote(e.target.value)}
+                  placeholder="Nhập cam kết tiến độ hoặc phản hồi cho khách hàng..."
+                  className="w-full p-3 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 resize-none"
+                  required
+                />
+              </div>
+
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-[11px] leading-relaxed">
+                🛡️ Sau khi đồng ý, Nhà tuyển dụng sẽ nhận được thông báo ngay lập tức để tiến hành nạp tiền cọc Escrow và kích hoạt Hợp đồng làm việc chính thức.
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowAcceptInviteModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs cursor-pointer"
+              >
+                Đóng
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-xs shadow-md cursor-pointer"
+              >
+                Xác Nhận Đồng Ý Nhận Việc
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Decline Invitation Modal */}
+      {showDeclineInviteModal && selectedInvitation && (
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <form
+            onSubmit={handleConfirmDeclineInvite}
+            className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200"
+          >
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center space-x-2 text-rose-700 font-bold text-base">
+                <XCircle className="w-5 h-5 text-rose-600" />
+                <span>Từ Chối Lời Mời Dự Án</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowDeclineInviteModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <p className="text-slate-600">
+                Vui lòng chọn lý do từ chối dự án "<strong>{selectedInvitation.projectTitle}</strong>" để thông báo lịch sự đến Nhà tuyển dụng:
+              </p>
+
+              <div className="space-y-2">
+                {[
+                  'Lịch trình hiện tại đã kín',
+                  'Ngân sách dự án chưa phù hợp với quy mô',
+                  'Yêu cầu chuyên môn không khớp với thế mạnh',
+                  'Thời hạn bàn giao quá gấp',
+                  'Khác...'
+                ].map((reason) => (
+                  <label
+                    key={reason}
+                    className={`flex items-center space-x-2.5 p-3 rounded-xl border cursor-pointer transition-all ${
+                      declineReasonOption === reason
+                        ? 'bg-rose-50 border-rose-300 text-rose-900 font-bold'
+                        : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="declineReason"
+                      value={reason}
+                      checked={declineReasonOption === reason}
+                      onChange={() => setDeclineReasonOption(reason)}
+                      className="text-rose-600 focus:ring-rose-500"
+                    />
+                    <span>{reason}</span>
+                  </label>
+                ))}
+              </div>
+
+              {declineReasonOption === 'Khác...' && (
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">Nhập lý do chi tiết:</label>
+                  <input
+                    type="text"
+                    value={customDeclineReason}
+                    onChange={(e) => setCustomDeclineReason(e.target.value)}
+                    placeholder="VD: Đang trong kỳ nghỉ phép..."
+                    className="w-full p-2.5 border border-slate-300 rounded-xl text-xs"
+                    required
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-3 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowDeclineInviteModal(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs cursor-pointer"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-extrabold py-3 rounded-xl text-xs shadow-md cursor-pointer"
+              >
+                Xác Nhận Từ Chối
               </button>
             </div>
           </form>
