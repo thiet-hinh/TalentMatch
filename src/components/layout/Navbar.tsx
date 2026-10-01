@@ -8,11 +8,8 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
-  LogIn,
   LogOut,
   Shield,
-  CreditCard,
-  UserCheck,
   User as UserIcon,
   ChevronDown,
   Sparkles,
@@ -115,44 +112,50 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <header className="bg-black/95 backdrop-blur-xl border-b border-neutral-800 sticky top-0 z-40 shadow-xl text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          
+
           {/* 1. Logo Brand & Main Links */}
           <div className="flex items-center space-x-6 lg:space-x-8">
             <Link to="/" className="flex items-center space-x-3 group">
-              <img
-                src="/logo_talentMatch.png"
-                alt="TalentMatch Logo"
-                className="h-10 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105"
-              />
+              <div className="relative shrink-0 flex items-center justify-center p-1 bg-white rounded-xl shadow-md group-hover:scale-105 transition-all">
+                <img
+                  src="/logo_talentMatch.png"
+                  alt="TalentMatch Logo"
+                  className="h-8 w-8 sm:h-9 sm:w-9 object-contain rounded-lg"
+                />
+              </div>
+              <div className="flex flex-col text-left">
+                <div className="flex items-center tracking-tight font-black text-lg sm:text-xl leading-none">
+                  <span className="text-white">Talent</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-400">Match</span>
+                  <span className="text-[9px] font-extrabold text-sky-400 ml-1.5 px-1.5 py-0.5 bg-sky-950/90 border border-sky-800/80 rounded-md leading-none">VN</span>
+                </div>
+                <span className="text-[9px] font-bold text-neutral-400 tracking-wider uppercase mt-0.5">Freelancer Market</span>
+              </div>
             </Link>
 
             {/* Main Navigation Links */}
-            <nav className="hidden lg:flex items-center space-x-6 text-xs font-bold text-slate-700">
+            <nav className="hidden lg:flex items-center space-x-2 text-xs font-bold">
               <Link
                 to="/projects"
-                className={`py-2 border-b-2 transition-all flex items-center gap-1.5 ${
-                  isActive('/projects')
-                    ? 'text-blue-600 border-blue-600 font-extrabold'
-                    : 'border-transparent text-slate-600 hover:text-blue-600'
-                }`}
+                className={`px-3.5 py-2 rounded-xl transition-all ${isActive('/projects')
+                  ? 'text-sky-400 bg-sky-950/90 border border-sky-500/50 font-extrabold shadow-sm'
+                  : 'text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent'
+                  }`}
               >
-                <Briefcase className="w-3.5 h-3.5 text-blue-600" />
-                <span>Dự Án Tuyển Dụng</span>
+                Dự Án Tuyển Dụng
               </Link>
 
               <Link
                 to="/freelancers"
-                className={`py-2 border-b-2 transition-all flex items-center gap-1.5 ${
-                  isActive('/freelancers')
-                    ? 'text-blue-600 border-blue-600 font-extrabold'
-                    : 'border-transparent text-slate-600 hover:text-blue-600'
-                }`}
+                className={`px-3.5 py-2 rounded-xl transition-all ${isActive('/freelancers')
+                  ? 'text-sky-400 bg-sky-950/90 border border-sky-500/50 font-extrabold shadow-sm'
+                  : 'text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent'
+                  }`}
               >
-                <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Hồ Sơ Freelancer</span>
+                Hồ Sơ Freelancer
               </Link>
 
               <button
@@ -161,40 +164,38 @@ export const Navbar: React.FC = () => {
                     amount: 5000000,
                     orderNumber: 'TM-2026-DEMO',
                     orderTitle: 'Mô phỏng Thanh toán Escrow qua Cổng VNPAY',
-                    onPaymentComplete: () => {}
+                    onPaymentComplete: () => { }
                   })
                 }
-                className="flex items-center space-x-1.5 text-emerald-800 text-[11px] bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-all font-bold cursor-pointer"
+                className="text-emerald-400 text-xs bg-emerald-950/90 hover:bg-emerald-900/90 px-3.5 py-2 rounded-xl border border-emerald-500/50 transition-all font-bold cursor-pointer shadow-sm"
               >
-                <CreditCard className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Cổng VNPAY Escrow</span>
+                Cổng VNPAY Escrow
               </button>
             </nav>
           </div>
 
           {/* 2. Right Side Controls */}
           <div className="hidden md:flex items-center space-x-3">
-            
+
             {/* Quick Test Accounts Switcher Dropdown */}
             <div className="relative" ref={testMenuRef}>
               <button
                 onClick={() => setTestAccountsOpen(!testAccountsOpen)}
-                className="flex items-center space-x-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition-all border border-slate-200 cursor-pointer"
+                className="flex items-center space-x-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-xs font-bold px-3 py-2 rounded-xl transition-all border border-neutral-700/80 cursor-pointer shadow-sm"
                 title="Đổi nhanh tài khoản mẫu để test các vai trò"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span className="hidden xl:inline">Test Vai Trò:</span>
-                <span className="text-blue-700 font-extrabold truncate max-w-[100px]">
+                <span className="hidden xl:inline text-neutral-400">Test:</span>
+                <span className="text-sky-400 font-extrabold truncate max-w-[100px]">
                   {currentUser.role === 'guest' ? 'Khách' : currentUser.name.split(' ').slice(-1)[0]}
                 </span>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${testAccountsOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${testAccountsOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {testAccountsOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-72 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-3.5 py-2 border-b border-slate-100">
                     <div className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                      Chọn Tài Khoản Mẫu Để Test
+                      Test Tài Khoản
                     </div>
                   </div>
                   <div className="max-h-80 overflow-y-auto p-1.5 space-y-1 text-xs">
@@ -205,9 +206,8 @@ export const Navbar: React.FC = () => {
                           switchUserById(u.id);
                           setTestAccountsOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                          currentUser.id === u.id ? 'bg-blue-50 text-blue-900 font-bold border border-blue-200' : 'hover:bg-slate-50 text-slate-700'
-                        }`}
+                        className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${currentUser.id === u.id ? 'bg-blue-50 text-blue-900 font-bold border border-blue-200' : 'hover:bg-slate-50 text-slate-700'
+                          }`}
                       >
                         <div className="flex items-center space-x-2.5">
                           <img src={u.avatar} alt={u.name} className="w-7 h-7 rounded-lg object-cover border border-slate-200" />
@@ -242,7 +242,7 @@ export const Navbar: React.FC = () => {
             <div className="relative" ref={notifMenuRef}>
               <button
                 onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
-                className="relative p-2 rounded-xl text-slate-600 hover:text-blue-600 hover:bg-slate-100 transition-all border border-slate-200 cursor-pointer"
+                className="relative p-2 rounded-xl text-neutral-300 hover:text-white hover:bg-neutral-900 transition-all border border-neutral-700/80 cursor-pointer shadow-sm"
                 title="Thông báo hệ thống"
               >
                 <Bell className="w-4 h-4" />
@@ -255,7 +255,7 @@ export const Navbar: React.FC = () => {
 
               {notificationDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-84 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  
+
                   {/* Notification Header */}
                   <div className="px-4 pb-2.5 border-b border-slate-100 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -296,11 +296,10 @@ export const Navbar: React.FC = () => {
                               navigate(notif.link);
                             }
                           }}
-                          className={`p-3 rounded-2xl transition-all cursor-pointer flex items-start space-x-3 ${
-                            !notif.isRead
-                              ? 'bg-blue-50/50 hover:bg-blue-100/60'
-                              : 'hover:bg-slate-50'
-                          }`}
+                          className={`p-3 rounded-2xl transition-all cursor-pointer flex items-start space-x-3 ${!notif.isRead
+                            ? 'bg-blue-50/50 hover:bg-blue-100/60'
+                            : 'hover:bg-slate-50'
+                            }`}
                         >
                           <div
                             className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${getNotifBg(
@@ -312,11 +311,10 @@ export const Navbar: React.FC = () => {
                           <div className="flex-1 min-w-0 text-left">
                             <div className="flex items-center justify-between">
                               <h4
-                                className={`text-xs truncate ${
-                                  !notif.isRead
-                                    ? 'font-extrabold text-slate-900'
-                                    : 'font-semibold text-slate-700'
-                                }`}
+                                className={`text-xs truncate ${!notif.isRead
+                                  ? 'font-extrabold text-slate-900'
+                                  : 'font-semibold text-slate-700'
+                                  }`}
                               >
                                 {notif.title}
                               </h4>
@@ -374,68 +372,67 @@ export const Navbar: React.FC = () => {
 
             {/* Guest View: Login & Register Buttons */}
             {currentUser.role === 'guest' ? (
-              <div className="flex items-center space-x-2 pl-2 border-l border-slate-200">
+              <div className="flex items-center space-x-2 pl-2 border-l border-neutral-800">
                 <button
                   onClick={() => openAuthModal('login')}
-                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 hover:text-white font-bold text-xs rounded-xl border border-neutral-750 transition-all cursor-pointer"
                 >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>Đăng nhập</span>
+                  Đăng nhập
                 </button>
                 <button
                   onClick={() => openAuthModal('register')}
-                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl transition-all shadow-xs cursor-pointer"
+                  className="px-3.5 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md cursor-pointer"
                 >
                   Đăng ký
                 </button>
               </div>
             ) : (
               /* Logged In: Interactive Avatar Profile Menu */
-              <div className="relative pl-3 border-l border-slate-200" ref={dropdownRef}>
+              <div className="relative pl-3 border-l border-neutral-800" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center space-x-2.5 p-1 rounded-2xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-200 cursor-pointer"
+                  className="flex items-center space-x-2.5 p-1 rounded-2xl hover:bg-neutral-900 transition-all border border-transparent hover:border-neutral-800 cursor-pointer"
                   title="Nhấn để xem thông tin cá nhân chi tiết"
                 >
                   <div className="relative">
                     <img
                       src={currentUser.avatar}
                       alt={currentUser.name}
-                      className="w-9 h-9 rounded-2xl object-cover border border-slate-300 ring-2 ring-blue-500/20 shadow-xs"
+                      className="w-9 h-9 rounded-2xl object-cover border border-neutral-700 ring-2 ring-sky-500/40 shadow-xs"
                     />
                     {currentUser.isVerified && (
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-blue-600 rounded-full border-2 border-white" />
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-sky-400 rounded-full border-2 border-neutral-950" />
                     )}
                   </div>
 
                   <div className="text-left text-xs hidden sm:block">
-                    <div className="font-extrabold text-slate-900 line-clamp-1 max-w-[110px]">{currentUser.name}</div>
-                    <div className="text-[10px] text-slate-500 capitalize leading-tight">
+                    <div className="font-extrabold text-white line-clamp-1 max-w-[110px]">{currentUser.name}</div>
+                    <div className="text-[10px] text-sky-400 capitalize font-medium leading-tight">
                       {currentUser.role === 'employer' ? 'Nhà tuyển dụng' : currentUser.role === 'freelancer' ? 'Freelancer' : 'Admin'}
                     </div>
                   </div>
 
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 text-neutral-400 transition-transform ${userDropdownOpen ? 'rotate-180 text-sky-400' : ''}`} />
                 </button>
 
                 {/* Profile Interactive Dropdown */}
                 {userDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    
+                  <div className="absolute right-0 mt-2 w-80 bg-neutral-950 text-neutral-200 rounded-3xl shadow-2xl border border-neutral-800 py-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+
                     {/* Top User Card */}
-                    <div className="px-4 pb-3 border-b border-slate-100 flex items-center space-x-3">
+                    <div className="px-4 pb-3 border-b border-neutral-800 flex items-center space-x-3">
                       <img
                         src={currentUser.avatar}
                         alt={currentUser.name}
-                        className="w-12 h-12 rounded-2xl object-cover border border-slate-200 ring-2 ring-blue-500/30"
+                        className="w-12 h-12 rounded-2xl object-cover border border-neutral-700 ring-2 ring-sky-500/50"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-extrabold text-slate-900 text-sm truncate">{currentUser.name}</div>
-                        <div className="text-slate-500 text-xs truncate">{currentUser.email || 'Chưa có email'}</div>
+                        <div className="font-extrabold text-white text-sm truncate">{currentUser.name}</div>
+                        <div className="text-neutral-400 text-xs truncate">{currentUser.email || 'Chưa có email'}</div>
                         <div className="flex items-center gap-1 mt-1">
                           {currentUser.emailVerified ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
-                              <CheckCircle2 className="w-2.5 h-2.5" />
+                            <span className="inline-flex items-center gap-1 text-[10px] text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-full font-bold border border-emerald-800/60">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
                               <span>Đã xác thực</span>
                             </span>
                           ) : (
@@ -444,9 +441,9 @@ export const Navbar: React.FC = () => {
                                 setUserDropdownOpen(false);
                                 openAuthModal('verification');
                               }}
-                              className="inline-flex items-center gap-1 text-[10px] text-amber-700 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-full font-bold border border-amber-300 cursor-pointer"
+                              className="inline-flex items-center gap-1 text-[10px] text-amber-300 bg-amber-950/60 hover:bg-amber-900/60 px-2 py-0.5 rounded-full font-bold border border-amber-800/60 cursor-pointer"
                             >
-                              <AlertCircle className="w-2.5 h-2.5 text-amber-600" />
+                              <AlertCircle className="w-2.5 h-2.5 text-amber-400" />
                               <span>Xác thực ngay</span>
                             </button>
                           )}
@@ -455,24 +452,24 @@ export const Navbar: React.FC = () => {
                     </div>
 
                     {/* Balance Preview & Withdrawal CTA */}
-                    <div className="p-3 mx-3 my-2 bg-slate-50 rounded-2xl border border-slate-100 text-xs">
-                      <div className="flex items-center justify-between text-slate-600 mb-1">
+                    <div className="p-3 mx-3 my-2 bg-neutral-900/90 rounded-2xl border border-neutral-800 text-xs">
+                      <div className="flex items-center justify-between text-neutral-300 mb-1">
                         <span className="flex items-center gap-1 font-semibold">
-                          <Wallet className="w-3.5 h-3.5 text-emerald-600" />
+                          <Wallet className="w-3.5 h-3.5 text-emerald-400" />
                           <span>Số dư ví:</span>
                         </span>
-                        <span className="font-black text-emerald-700">{(currentUser.balance || 0).toLocaleString('vi-VN')} đ</span>
+                        <span className="font-black text-emerald-400">{(currentUser.balance || 0).toLocaleString('vi-VN')} đ</span>
                       </div>
-                      <div className="flex items-center justify-between text-slate-500 text-[11px] mb-2">
+                      <div className="flex items-center justify-between text-neutral-400 text-[11px] mb-2">
                         <span>Cọc Escrow:</span>
-                        <span className="font-bold text-blue-700">{(currentUser.escrowBalance || 0).toLocaleString('vi-VN')} đ</span>
+                        <span className="font-bold text-sky-400">{(currentUser.escrowBalance || 0).toLocaleString('vi-VN')} đ</span>
                       </div>
                       <button
                         onClick={() => {
                           setUserDropdownOpen(false);
                           openWithdrawModal();
                         }}
-                        className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-[11px] transition-all flex items-center justify-center gap-1 shadow-xs cursor-pointer"
+                        className="w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-extrabold text-[11px] transition-all flex items-center justify-center gap-1 shadow-sm cursor-pointer"
                       >
                         <Wallet className="w-3 h-3" />
                         <span>Rút tiền về ngân hàng</span>
@@ -480,17 +477,17 @@ export const Navbar: React.FC = () => {
                     </div>
 
                     {/* Menu Actions */}
-                    <div className="px-2 space-y-1 text-xs font-semibold text-slate-700">
-                      
+                    <div className="px-2 space-y-1 text-xs font-semibold text-neutral-300">
+
                       {/* Open Detailed Profile Modal */}
                       <button
                         onClick={() => {
                           setUserDropdownOpen(false);
                           openUserProfileModal();
                         }}
-                        className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-all text-left cursor-pointer font-bold"
+                        className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-neutral-900 hover:text-white transition-all text-left cursor-pointer font-bold"
                       >
-                        <UserIcon className="w-4 h-4 text-blue-600" />
+                        <UserIcon className="w-4 h-4 text-sky-400" />
                         <span>Xem Thông Tin Cá Nhân Chi Tiết</span>
                       </button>
 
@@ -500,17 +497,17 @@ export const Navbar: React.FC = () => {
                           <Link
                             to="/employer/dashboard"
                             onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-all"
+                            className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-neutral-900 hover:text-white transition-all"
                           >
-                            <LayoutDashboard className="w-4 h-4 text-slate-500" />
+                            <LayoutDashboard className="w-4 h-4 text-neutral-400" />
                             <span>Dashboard Nhà Tuyển Dụng</span>
                           </Link>
                           <Link
                             to="/create-project"
                             onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-blue-50 text-blue-700 transition-all font-bold"
+                            className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-sky-950/60 text-sky-400 hover:text-sky-300 transition-all font-bold"
                           >
-                            <PlusCircle className="w-4 h-4 text-blue-600" />
+                            <PlusCircle className="w-4 h-4 text-sky-400" />
                             <span>+ Đăng Dự Án Mới</span>
                           </Link>
                         </>
@@ -520,9 +517,9 @@ export const Navbar: React.FC = () => {
                         <Link
                           to="/freelancer/dashboard"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-all"
+                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-neutral-900 hover:text-white transition-all"
                         >
-                          <LayoutDashboard className="w-4 h-4 text-slate-500" />
+                          <LayoutDashboard className="w-4 h-4 text-neutral-400" />
                           <span>Góc Quản Lý Freelancer</span>
                         </Link>
                       )}
@@ -531,23 +528,23 @@ export const Navbar: React.FC = () => {
                         <Link
                           to="/admin/dashboard"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition-all text-purple-700 font-bold"
+                          className="flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-purple-950/50 text-purple-300 hover:text-purple-200 transition-all font-bold"
                         >
-                          <Shield className="w-4 h-4 text-purple-600" />
+                          <Shield className="w-4 h-4 text-purple-400" />
                           <span>Cổng Quản Trị Admin</span>
                         </Link>
                       )}
 
                       {/* Logout Button */}
-                      <div className="border-t border-slate-100 pt-1 mt-1">
+                      <div className="border-t border-neutral-800 pt-1 mt-1">
                         <button
                           onClick={() => {
                             setUserDropdownOpen(false);
                             logout();
                           }}
-                          className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-rose-50 text-rose-700 transition-all text-left cursor-pointer font-bold"
+                          className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-rose-950/50 text-rose-300 hover:text-rose-200 transition-all text-left cursor-pointer font-bold"
                         >
-                          <LogOut className="w-4 h-4 text-rose-500" />
+                          <LogOut className="w-4 h-4 text-rose-400" />
                           <span>Đăng Xuất Khỏi Tài Khoản</span>
                         </button>
                       </div>
@@ -574,12 +571,12 @@ export const Navbar: React.FC = () => {
                   navigate('/projects');
                 }
               }}
-              className="relative p-1.5 rounded-xl border border-slate-200 text-slate-600"
+              className="relative p-1.5 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-300 hover:text-white"
               title="Thông báo"
             >
               <Bell className="w-5 h-5" />
               {unreadNotificationsCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-600 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
                   {unreadNotificationsCount}
                 </span>
               )}
@@ -588,7 +585,7 @@ export const Navbar: React.FC = () => {
             {currentUser.role !== 'guest' ? (
               <button
                 onClick={openUserProfileModal}
-                className="p-1 rounded-xl border border-slate-200 cursor-pointer"
+                className="p-1 rounded-xl border border-neutral-800 bg-neutral-900 cursor-pointer"
                 title="Xem hồ sơ cá nhân"
               >
                 <img src={currentUser.avatar} alt={currentUser.name} className="w-8 h-8 rounded-lg object-cover" />
@@ -596,7 +593,7 @@ export const Navbar: React.FC = () => {
             ) : (
               <button
                 onClick={() => openAuthModal('login')}
-                className="px-2.5 py-1.5 bg-blue-600 text-white font-bold text-xs rounded-xl cursor-pointer"
+                className="px-2.5 py-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs rounded-xl cursor-pointer"
               >
                 Đăng nhập
               </button>
@@ -604,9 +601,9 @@ export const Navbar: React.FC = () => {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-600 hover:text-blue-600 focus:outline-none cursor-pointer"
+              className="p-2 text-neutral-300 hover:text-white focus:outline-none cursor-pointer"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-6 h-6 text-sky-400" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -614,34 +611,34 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-4 text-xs animate-in slide-in-from-top-2 duration-150">
-          <div className="flex flex-col space-y-3 font-bold text-slate-700">
-            <Link to="/projects" onClick={() => setMobileMenuOpen(false)} className="py-1">
+        <div className="md:hidden bg-neutral-950 border-b border-neutral-800 px-4 pt-3 pb-6 space-y-4 text-xs animate-in slide-in-from-top-2 duration-150 text-neutral-200">
+          <div className="flex flex-col space-y-3 font-bold">
+            <Link to="/projects" onClick={() => setMobileMenuOpen(false)} className="py-1 hover:text-sky-400">
               Dự Án Tuyển Dụng
             </Link>
-            <Link to="/freelancers" onClick={() => setMobileMenuOpen(false)} className="py-1">
+            <Link to="/freelancers" onClick={() => setMobileMenuOpen(false)} className="py-1 hover:text-sky-400">
               Hồ Sơ Freelancer & Portfolio
             </Link>
-            
+
             {currentUser.role === 'employer' && (
               <>
-                <Link to="/employer/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-slate-800">
+                <Link to="/employer/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-neutral-200 hover:text-sky-400">
                   Dashboard Tuyển Dụng
                 </Link>
-                <Link to="/create-project" onClick={() => setMobileMenuOpen(false)} className="text-blue-600">
+                <Link to="/create-project" onClick={() => setMobileMenuOpen(false)} className="text-sky-400 font-extrabold">
                   + Đăng Dự Án Mới
                 </Link>
               </>
             )}
 
             {currentUser.role === 'freelancer' && (
-              <Link to="/freelancer/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-blue-600">
+              <Link to="/freelancer/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-sky-400 font-extrabold">
                 Dashboard Freelancer
               </Link>
             )}
 
             {currentUser.role === 'admin' && (
-              <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-purple-600">
+              <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="text-purple-300 font-extrabold">
                 Dashboard Quản Trị Admin
               </Link>
             )}
@@ -652,7 +649,7 @@ export const Navbar: React.FC = () => {
                   setMobileMenuOpen(false);
                   openUserProfileModal();
                 }}
-                className="text-left text-blue-700 font-bold py-1 flex items-center gap-1.5 cursor-pointer"
+                className="text-left text-sky-400 font-bold py-1 flex items-center gap-1.5 cursor-pointer"
               >
                 <UserIcon className="w-4 h-4" />
                 <span>Xem Thông Tin Cá Nhân Chi Tiết</span>
@@ -660,8 +657,8 @@ export const Navbar: React.FC = () => {
             )}
 
             {/* Quick Test Switcher for Mobile */}
-            <div className="pt-3 border-t border-slate-100">
-              <div className="text-[11px] font-extrabold text-slate-400 uppercase mb-2">Đổi tài khoản test:</div>
+            <div className="pt-3 border-t border-neutral-800">
+              <div className="text-[11px] font-extrabold text-neutral-400 uppercase mb-2">Đổi tài khoản test:</div>
               <div className="grid grid-cols-2 gap-1.5">
                 {users.slice(0, 4).map((u) => (
                   <button
@@ -670,26 +667,25 @@ export const Navbar: React.FC = () => {
                       switchUserById(u.id);
                       setMobileMenuOpen(false);
                     }}
-                    className={`p-2 rounded-xl text-[11px] text-left border ${
-                      currentUser.id === u.id ? 'bg-blue-50 border-blue-300 font-bold' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`p-2 rounded-xl text-[11px] text-left border ${currentUser.id === u.id ? 'bg-sky-950/70 border-sky-600 text-sky-200 font-bold' : 'bg-neutral-900 border-neutral-800 text-neutral-300'
+                      }`}
                   >
                     <div className="font-bold truncate">{u.name}</div>
-                    <div className="text-[9px] text-slate-500 capitalize">{u.role}</div>
+                    <div className="text-[9px] text-neutral-400 capitalize">{u.role}</div>
                   </button>
                 ))}
               </div>
             </div>
 
             {/* Logout / Login in Mobile */}
-            <div className="pt-2 border-t border-slate-100">
+            <div className="pt-2 border-t border-neutral-800">
               {currentUser.role !== 'guest' ? (
                 <button
                   onClick={() => {
-                  setMobileMenuOpen(false);
-                  logout();
-                }}
-                  className="w-full py-2.5 bg-rose-50 text-rose-700 font-bold rounded-xl flex items-center justify-center gap-1.5 cursor-pointer"
+                    setMobileMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full py-2.5 bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 font-bold rounded-xl border border-rose-900/50 flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Đăng xuất (Khách)</span>
@@ -701,7 +697,7 @@ export const Navbar: React.FC = () => {
                       setMobileMenuOpen(false);
                       openAuthModal('login');
                     }}
-                    className="flex-1 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl"
+                    className="flex-1 py-2 bg-neutral-900 border border-neutral-800 text-neutral-200 font-bold rounded-xl"
                   >
                     Đăng nhập
                   </button>
@@ -710,7 +706,7 @@ export const Navbar: React.FC = () => {
                       setMobileMenuOpen(false);
                       openAuthModal('register');
                     }}
-                    className="flex-1 py-2 bg-blue-600 text-white font-bold rounded-xl"
+                    className="flex-1 py-2 bg-sky-500 text-slate-950 font-black rounded-xl"
                   >
                     Đăng ký
                   </button>

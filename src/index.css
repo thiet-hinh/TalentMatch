@@ -2,30 +2,43 @@
 
 @layer base {
   :root {
-    --primary-blue: #2563eb;
-    --primary-blue-hover: #1d4ed8;
-    --primary-blue-light: #eff6ff;
-    --brand-blue: #0052ff;
+    --primary-blue: #0284c7;
+    --primary-blue-hover: #0369a1;
+    --primary-blue-light: #f0f9ff;
+    --brand-blue: #2563eb;
+    --brand-blue-hover: #1d4ed8;
+    --brand-emerald: #059669;
   }
   
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     color: #0f172a;
     background-color: #f8fafc;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.02em;
   }
 }
 
-/* Custom electric bright blue utility classes to override standard dull blue */
+/* Fresh bright blue & emerald utility classes */
 .bg-brand-blue {
-  background-color: #2563eb;
+  background-color: #0284c7;
 }
-.bg-brand-blue-gradient {
-  background: linear-gradient(135deg, #0052ff 0%, #2563eb 100%);
+.bg-brand-blue-hover:hover {
+  background-color: #0369a1;
+}
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
 }
 .text-brand-blue {
-  color: #2563eb;
+  color: #0284c7;
 }
 .border-brand-blue {
-  border-color: #2563eb;
+  border-color: #0284c7;
 }
+
 

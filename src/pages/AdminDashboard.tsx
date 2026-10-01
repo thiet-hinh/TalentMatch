@@ -103,12 +103,12 @@ export const AdminDashboard: React.FC = () => {
         
         {/* Sidebar Brand Header */}
         <div className="p-6 border-b border-slate-800/80 flex items-center space-x-3">
-          <div className="w-10 h-10 bg-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-purple-600/30">
+          <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-600/30">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
             <div className="font-extrabold text-white text-base tracking-wide">TalentMatch</div>
-            <div className="text-[11px] text-purple-400 font-bold uppercase tracking-wider">Super Admin Portal</div>
+            <div className="text-[11px] text-blue-400 font-bold uppercase tracking-wider">Super Admin Portal</div>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ export const AdminDashboard: React.FC = () => {
                 onClick={() => setActiveTab(item.id as any)}
                 className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
                   isActive
-                    ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
@@ -152,7 +152,7 @@ export const AdminDashboard: React.FC = () => {
                 {item.badge !== null && (
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
-                      item.badgeColor || (isActive ? 'bg-purple-800 text-purple-200' : 'bg-slate-800 text-slate-300')
+                      item.badgeColor || (isActive ? 'bg-blue-800 text-blue-200' : 'bg-slate-800 text-slate-300')
                     }`}
                   >
                     {item.badge}
@@ -177,7 +177,7 @@ export const AdminDashboard: React.FC = () => {
             onClick={resetAllDemoData}
             className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-bold rounded-xl transition-all flex items-center justify-center gap-1.5"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-purple-400" />
+            <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
             <span>Khôi phục dữ liệu gốc</span>
           </button>
         </div>
@@ -196,7 +196,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 flex items-center gap-2">
-                  <BarChart3 className="w-7 h-7 text-purple-600" />
+                  <BarChart3 className="w-7 h-7 text-blue-600" />
                   <span>Tổng Quan Hiệu Suất Sàn & Biểu Đồ Thống Kê</span>
                 </h1>
                 <p className="text-slate-500 text-xs mt-1">
