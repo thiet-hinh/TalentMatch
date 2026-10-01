@@ -205,6 +205,7 @@ export const Navbar: React.FC = () => {
                         onClick={() => {
                           switchUserById(u.id);
                           setTestAccountsOpen(false);
+                          navigate('/');
                         }}
                         className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${currentUser.id === u.id ? 'bg-blue-50 text-blue-900 font-bold border border-blue-200' : 'hover:bg-slate-50 text-slate-700'
                           }`}
@@ -227,6 +228,7 @@ export const Navbar: React.FC = () => {
                       onClick={() => {
                         logout();
                         setTestAccountsOpen(false);
+                        navigate('/');
                       }}
                       className="w-full flex items-center space-x-2.5 p-2.5 rounded-xl hover:bg-rose-50 text-rose-700 transition-all font-bold cursor-pointer border-t border-slate-100 mt-1"
                     >
@@ -541,6 +543,7 @@ export const Navbar: React.FC = () => {
                           onClick={() => {
                             setUserDropdownOpen(false);
                             logout();
+                            navigate('/');
                           }}
                           className="w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-xl hover:bg-rose-950/50 text-rose-300 hover:text-rose-200 transition-all text-left cursor-pointer font-bold"
                         >
@@ -666,6 +669,7 @@ export const Navbar: React.FC = () => {
                     onClick={() => {
                       switchUserById(u.id);
                       setMobileMenuOpen(false);
+                      navigate('/');
                     }}
                     className={`p-2 rounded-xl text-[11px] text-left border ${currentUser.id === u.id ? 'bg-sky-950/70 border-sky-600 text-sky-200 font-bold' : 'bg-neutral-900 border-neutral-800 text-neutral-300'
                       }`}
@@ -684,6 +688,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => {
                     setMobileMenuOpen(false);
                     logout();
+                    navigate('/');
                   }}
                   className="w-full py-2.5 bg-rose-950/50 hover:bg-rose-900/60 text-rose-300 font-bold rounded-xl border border-rose-900/50 flex items-center justify-center gap-1.5 cursor-pointer"
                 >

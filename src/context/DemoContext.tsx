@@ -36,17 +36,17 @@ interface Toast {
   message: string;
 }
 
-const STORAGE_KEY_USERS = 'talentmatch_demo_users_v2';
-const STORAGE_KEY_CURRENT_USER_ID = 'talentmatch_demo_current_user_id_v2';
-const STORAGE_KEY_PROJECTS = 'talentmatch_demo_projects_v2';
-const STORAGE_KEY_PROPOSALS = 'talentmatch_demo_proposals_v2';
-const STORAGE_KEY_ORDERS = 'talentmatch_demo_orders_v2';
-const STORAGE_KEY_REVIEWS = 'talentmatch_demo_reviews_v2';
-const STORAGE_KEY_DISPUTES = 'talentmatch_demo_disputes_v2';
-const STORAGE_KEY_VNPAY = 'talentmatch_demo_vnpay_v2';
-const STORAGE_KEY_CONFIG = 'talentmatch_demo_config_v2';
-const STORAGE_KEY_FREELANCERS = 'talentmatch_demo_freelancers_v2';
-const STORAGE_KEY_NOTIFICATIONS = 'talentmatch_demo_notifications_v2';
+const STORAGE_KEY_USERS = 'talentmatch_demo_users_v4';
+const STORAGE_KEY_CURRENT_USER_ID = 'talentmatch_demo_current_user_id_v4';
+const STORAGE_KEY_PROJECTS = 'talentmatch_demo_projects_v4';
+const STORAGE_KEY_PROPOSALS = 'talentmatch_demo_proposals_v4';
+const STORAGE_KEY_ORDERS = 'talentmatch_demo_orders_v4';
+const STORAGE_KEY_REVIEWS = 'talentmatch_demo_reviews_v4';
+const STORAGE_KEY_DISPUTES = 'talentmatch_demo_disputes_v4';
+const STORAGE_KEY_VNPAY = 'talentmatch_demo_vnpay_v4';
+const STORAGE_KEY_CONFIG = 'talentmatch_demo_config_v4';
+const STORAGE_KEY_FREELANCERS = 'talentmatch_demo_freelancers_v4';
+const STORAGE_KEY_NOTIFICATIONS = 'talentmatch_demo_notifications_v4';
 
 const loadFromStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -528,7 +528,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       id: `usr-${Date.now()}`,
       name: data.name,
       email: data.email,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(data.name)}`,
+      avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(data.name)}`,
       role: data.role,
       phone: data.phone,
       isVerified: false,
@@ -617,7 +617,7 @@ export const DemoProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setPendingGoogleUser({
         email: googleEmail,
         name: 'Trần Google User',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150'
+        avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(googleEmail)}`
       });
       setAuthModalMode('google-role');
     }

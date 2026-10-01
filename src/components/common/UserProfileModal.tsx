@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useDemo } from '../../context/DemoContext';
 import {
   X,
@@ -24,7 +25,6 @@ import {
   Building,
   ChevronDown
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const VIETNAM_BANKS = [
   { id: 'VCB', name: 'Vietcombank (Ngoại Thương Việt Nam)', shortName: 'Vietcombank', logo: '🏛️' },
@@ -38,6 +38,7 @@ const VIETNAM_BANKS = [
 ];
 
 export const UserProfileModal: React.FC = () => {
+  const navigate = useNavigate();
   const {
     currentUser,
     isUserProfileModalOpen,
@@ -501,6 +502,7 @@ export const UserProfileModal: React.FC = () => {
               onClick={() => {
                 closeUserProfileModal();
                 logout();
+                navigate('/');
               }}
               className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
             >
